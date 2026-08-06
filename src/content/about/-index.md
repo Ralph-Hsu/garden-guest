@@ -1,8 +1,31 @@
 ---
-title: Hey, I'm Jane Doe!
-description: this is meta description
-image: "@assets/profile/jane-doe.jpg"
+title: 園區介紹
+description: 中台庭園的故事、理念與園區特色介紹。
 draft: false
 ---
 
-Lorem ipsum dolor sit amet consectetur adipisicing elit. Corporis illum nesciunt commodi vel nisi ut alias excepturi ipsum, totam, labore tempora, odit ex iste tempore sed. Fugit voluptatibus perspiciatis assumenda nulla ad nihil, omnis vel, doloremque sit quam autem optio maiores, illum eius facilis et quo consectetur provident dolor similique! Enim voluptatem dicta expedita veritatis repellat dolorum impedit, provident quasi at.
+<!-- 【此處請更換成中台庭園的完整介紹文字】 -->
+
+## 關於中台庭園
+
+此處請填入中台庭園的創立故事與歷史背景。
+
+## 我們的理念
+
+此處請填入庭園的經營理念與對自然、植物的熱愛。
+
+## 園區特色
+
+此處請填入庭園的主要特色，例如：
+
+- 七大品種的完整櫻花系列
+- 逾百種寒帶與熱帶睡蓮
+- 精心培育的盆栽藝術收藏
+- 豐富多元的草本藤本花草
+
+## 聯絡我們
+
+- **地址**：此處請填入庭園地址
+- **電話**：此處請填入聯絡電話
+- **電子郵件**：此處請填入電子郵件
+- **開放時間**：週二至週日 08:30–17:30（週一公休）

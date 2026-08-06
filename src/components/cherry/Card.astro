@@ -1,0 +1,66 @@
+---
+/**
+ * Cherry 品種卡片組件
+ * 用於 /cherry 首頁的品種列表區塊
+ */
+import type { CherryEntry } from "@/types";
+
+interface Props {
+  entry: CherryEntry;
+}
+
+const { entry } = Astro.props;
+const { title, latinName, bloomSeason, color, image, mapPosition } = entry.data;
+---
+
+<a
+  href={`/cherry/${entry.id}`}
+  class="group glass rounded-2xl overflow-hidden hover:-translate-y-1 transition-all duration-300 intersect:animate-fadeUp opacity-0 block"
+>
+  <!-- 封面圖 -->
+  <div
+    class="relative w-full h-48 bg-rose-100 dark:bg-stone-700 bg-cover bg-center overflow-hidden"
+    style={image ? `background-image: url('${image}');` : ""}
+  >
+    {!image && (
+      <div class="absolute inset-0 flex items-center justify-center text-5xl">
+        🌸
+      </div>
+    )}
+    <!-- 花色標籤 -->
+    {color && (
+      <div class="absolute top-3 right-3">
+        <span class="bg-rose-600/80 text-white text-xs font-secondary px-2 py-1 rounded-full">
+          {color}
+        </span>
+      </div>
+    )}
+    <!-- 地圖位置標記 -->
+    {mapPosition && (
+      <div class="absolute bottom-3 left-3">
+        <span class="bg-black/40 text-white text-xs font-secondary px-2 py-1 rounded-full backdrop-blur-sm">
+          📍 {mapPosition.label ?? title}
+        </span>
+      </div>
+    )}
+    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+  </div>
+
+  <!-- 文字內容 -->
+  <div class="p-4">
+    <h4 class="text-txt-p dark:text-darkmode-txt-p mb-1 group-hover:text-garden-rose dark:group-hover:text-rose-300 transition-colors" style="opacity:1">
+      {title}
+    </h4>
+    {latinName && (
+      <p class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light italic mb-2" style="opacity:1">
+        {latinName}
+      </p>
+    )}
+    {bloomSeason && (
+      <div class="flex items-center gap-1">
+        <span class="text-xs">🗓</span>
+        <span class="font-secondary text-xs text-garden-amber dark:text-amber-300">{bloomSeason}</span>
+      </div>
+    )}
+  </div>
+</a>

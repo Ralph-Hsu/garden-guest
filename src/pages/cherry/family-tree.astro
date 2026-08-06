@@ -1,0 +1,55 @@
+---
+import BaseLayout from "@components/base/BaseLayout.astro";
+---
+
+<BaseLayout title="櫻花族譜" description="中台庭園七大櫻花品種的親緣關係圖譜。">
+
+  <section class="relative min-h-[40vh] flex items-center justify-center overflow-hidden -mt-4 mb-0">
+    <div class="absolute inset-0 bg-gradient-to-b from-rose-900/50 to-stone-900/60" />
+    <div class="relative z-10 text-center px-4">
+      <div class="glass rounded-3xl px-10 py-8 inline-block intersect:animate-scale opacity-0">
+        <p class="font-secondary text-sm tracking-[0.3em] text-rose-200 uppercase mb-2">Family Tree</p>
+        <h1 class="text-white mb-2">櫻花族譜</h1>
+        <p class="font-secondary text-stone-200 text-sm">七大品種的親緣關係圖</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="max-w-4xl mx-auto">
+
+      <div class="glass rounded-2xl p-6 md:p-10 mb-6 intersect:animate-fadeUp opacity-0">
+        <p class="font-secondary text-sm text-txt-light dark:text-darkmode-txt-light mb-6" style="opacity:1">
+          <!-- 【此處可更換成族譜的文字說明】 -->
+          中台庭園七大櫻花品種的親緣演化關係，呈現各品種之間的雜交脈絡與源流。
+        </p>
+
+        <!-- 族譜圖片
+             【請將族譜圖片放置於 /public/images/cherry/family-tree.jpg】
+             建議尺寸：1200×800px 或以上 -->
+        <div class="w-full rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800">
+          <img
+            src="/images/cherry/family-tree.jpg"
+            alt="中台庭園櫻花族譜"
+            class="w-full h-auto object-contain"
+            loading="lazy"
+            onerror="this.parentElement.innerHTML='<div class=\'flex flex-col items-center justify-center py-20 text-stone-400\'><span class=\'text-5xl mb-4\'>🌳</span><p class=\'font-secondary text-sm text-center\'>請將族譜圖片放置於<br/><code>/public/images/cherry/family-tree.jpg</code></p></div>'"
+          />
+        </div>
+      </div>
+
+      <!-- 底部說明 -->
+      <div class="glass rounded-2xl p-5 mb-6 intersect:animate-fadeUp opacity-0">
+        <h4 class="text-garden-amber dark:text-amber-300 mb-3" style="opacity:1">品種說明</h4>
+        <!-- 【此處可更換成族譜各節點的補充說明文字】 -->
+        <p class="font-secondary text-sm text-txt-s dark:text-darkmode-txt-s leading-relaxed" style="opacity:1">
+          此處請填入族譜的補充說明，例如各品種的起源地、雜交親本資訊，以及在台灣的引進歷史等。
+        </p>
+      </div>
+
+      <a href="/cherry" class="inline-block font-secondary text-sm text-garden-amber dark:text-amber-300 hover:opacity-70 transition intersect:animate-fadeUp opacity-0" style="opacity:0">
+        ← 回到櫻花總覽
+      </a>
+    </div>
+  </section>
+</BaseLayout>

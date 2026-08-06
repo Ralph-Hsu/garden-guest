@@ -10,18 +10,12 @@ let h3 = h4 * font_scale;
 let h2 = h3 * font_scale;
 let h1 = h2 * font_scale;
 
-let fontPrimary = "serif";
-let fontPrimaryType = "serif";
-let fontSecondary = "open sans";
+// 大標題：知芒行（中文行書，Google Fonts）
+let fontPrimary = "Zhi Mang Xing";
+let fontPrimaryType = "cursive";
+// 內文：Open Sans
+let fontSecondary = "Open Sans";
 let fontSecondaryType = "sans-serif";
-
-fontPrimary = fontPrimary
-  .replace(/\+/g, " ")
-  .replace(/:[ital,]*[ital@]*[wght@]*[0-9,;]+/gi, "");
-
-fontSecondary = fontSecondary
-  .replace(/\+/g, " ")
-  .replace(/:[ital,]*[ital@]*[wght@]*[0-9,;]+/gi, "");
 
 /** @type {import("tailwindcss").Config} */
 module.exports = {
@@ -42,29 +36,40 @@ module.exports = {
     },
     extend: {
       colors: {
+        // 亮色模式：暖石灰白系
         txt: {
-          p: "#000",
-          s: "#222",
-          light: "#444",
+          p: "#292524",      // stone-800（深暖灰，取代純黑）
+          s: "#44403c",      // stone-700
+          light: "#78716c",  // stone-500
         },
         bg: {
-          p: "#fff",
-          s: "#ddd",
-          t: "#ddd",
+          p: "#fafaf9",      // stone-50（暖石灰白，取代純白）
+          s: "#f0ebe4",      // 暖米白
+          t: "#e7e0d8",      // 暖米色邊框底色
         },
-        border: "#ddd",
+        border: "#d6cfc7",   // 暖石灰邊框
+        // 暗色模式：深石褐系
         darkmode: {
           txt: {
-            p: "#fff",
-            s: "#ddd",
-            light: "#bbb",
+            p: "#fafaf9",    // stone-50
+            s: "#d6d3d1",    // stone-300
+            light: "#a8a29e", // stone-400
           },
           bg: {
-            p: "#222",
-            s: "#444",
-            t: "#444",
+            p: "#1c1917",    // stone-900
+            s: "#292524",    // stone-800
+            t: "#292524",    // stone-800
           },
-          border: "#444",
+          border: "#57534e", // stone-600
+        },
+        // 庭園點綴色
+        garden: {
+          amber: "#92400e",  // amber-800（深琥珀木質）
+          "amber-light": "#d97706", // amber-600
+          rose: "#fb7185",   // rose-400（櫻花粉）
+          "rose-deep": "#e11d48", // rose-600
+          emerald: "#065f46", // emerald-800（植物深綠）
+          "emerald-mid": "#059669", // emerald-600
         },
       },
       minHeight: {
@@ -122,8 +127,6 @@ module.exports = {
         fadeRight: "fadeInRight 1000ms both",
         fadeLeft: "fadeInLeft 1000ms both",
         scale: "scaleOut 1000ms both",
-        // Star Background
-        twinkle: "twinkle 5s infinite ease-in-out",
         // Cycle Background
         cycleBg: "cycleBg 60s ease infinite",
       },
@@ -152,11 +155,6 @@ module.exports = {
         scaleOut: {
           "0%": { opacity: 0, transform: "scale(0.5)" },
           "100%": { opacity: 1, transform: "scale(1)" },
-        },
-        // Star Background
-        twinkle: {
-          "0%, 20%, 100%": { opacity: 1 },
-          "10%": { opacity: 0.25 },
         },
         // Cycle Background
         cycleBg: {

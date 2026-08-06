@@ -1,54 +1,261 @@
 ---
 import BaseLayout from "@components/base/BaseLayout.astro";
-import { markdownify } from "@lib/textConverter";
-import Button from "@components/common/Button.astro";
-import type { HomeEntry } from "@/types";
-import { Image } from "astro:assets";
+import { getCollection } from "astro:content";
+import type { CherryEntry, NewsEntry } from "@/types";
 
-interface Props {
-  entry: HomeEntry;
-}
+// 取得最新花況前三篇
+const allNews = (await getCollection("news", ({ data }) => !data.draft))
+  .sort((a, b) => (b.data.date?.valueOf() ?? 0) - (a.data.date?.valueOf() ?? 0))
+  .slice(0, 3);
 
-const { entry } = Astro.props;
-const { image, imageAlt, title, content, button } = entry.data;
+// 四大主題快捷
+const themes = [
+  {
+    title: "櫻花",
+    subtitle: "七大品種・絢爛花海",
+    url: "/cherry",
+    icon: "🌸",
+    color: "from-rose-900/50 to-pink-800/60",
+    image: "/images/cherry/hero.jpg",
+    // 【請將櫻花代表照片放置於 /public/images/cherry/hero.jpg】
+  },
+  {
+    title: "睡蓮",
+    subtitle: "寒帶・熱帶・百種風情",
+    url: "/lotus",
+    icon: "🪷",
+    color: "from-teal-900/50 to-cyan-800/60",
+    image: "/images/lotus/hero.jpg",
+    // 【請將睡蓮代表照片放置於 /public/images/lotus/hero.jpg】
+  },
+  {
+    title: "盆栽",
+    subtitle: "歲月刻痕・方寸之間",
+    url: "/bonsai",
+    icon: "🌿",
+    color: "from-emerald-900/50 to-green-800/60",
+    image: "/images/bonsai/hero.jpg",
+    // 【請將盆栽代表照片放置於 /public/images/bonsai/hero.jpg】
+  },
+  {
+    title: "花草",
+    subtitle: "近百品種・芬芳四溢",
+    url: "/flora",
+    icon: "🌺",
+    color: "from-amber-900/50 to-orange-800/60",
+    image: "/images/flora/hero.jpg",
+    // 【請將花草代表照片放置於 /public/images/flora/hero.jpg】
+  },
+];
 ---
 
 <BaseLayout>
-  <!-- Banner -->
-  <section class="section">
-    <div class="container">
-      <div class="row justify-center">
-        <div class="text-center lg:col-6">
-          {
-            image && (
-              <div class="blur-[0px]">
-                <Image
-                class="mb-6 w-64"
-                src={image}
-                alt={imageAlt}
-                width={1024}
-                height={1024}
-                loading="eager"
-              />
-              </div>
-              
-            )
-          }
-          <h1 set:html={markdownify(title)} class="mb-4" />
-          <p set:html={markdownify(content)} class="mb-8" />
-          {
-            button && (
-              <Button
-                label={button.label}
-                link={button.link}
-                newtab
-                hoverInvert
-                color=""
-              />
-            )
-          }
+  <!-- ============================================================
+       HERO 區塊
+       背景圖片透過 Background.astro 的全頁背景提供
+       【請將庭園主視覺照片放置於 /public/images/backgrounds/garden-day.jpg】
+       ============================================================ -->
+  <section class="relative min-h-[90vh] flex items-center justify-center -mt-4 mb-0 overflow-hidden">
+    <!-- 暖色漸層遮罩 -->
+    <div class="garden-overlay absolute inset-0 z-0 pointer-events-none"></div>
+
+    <!-- 毛玻璃標題卡片 -->
+    <div class="relative z-10 text-center px-4 max-w-2xl mx-auto">
+      <div class="glass rounded-3xl px-8 py-10 md:px-12 md:py-14 intersect:animate-scale opacity-0">
+        <!-- 小標題 -->
+        <p class="font-secondary text-sm tracking-[0.3em] text-amber-200 dark:text-amber-300 uppercase mb-3 intersect:animate-fadeDown opacity-0">
+          中台庭園
+        </p>
+        <!-- 主標題 -->
+        <h1 class="text-white dark:text-amber-50 mb-4 leading-snug" style="text-shadow: 0 2px 12px rgba(0,0,0,0.4);">
+          遇見，<br class="sm:hidden" />自然的四季之美
+        </h1>
+        <!-- 副標 -->
+        <p class="font-secondary text-stone-200 dark:text-stone-300 text-base md:text-lg mb-8 leading-relaxed intersect:animate-fade opacity-0">
+          <!-- 【此處請更換成庭園的宣傳標語】 -->
+          讓花草帶你感受每一季的溫柔，探索自然生命的無窮變化。
+        </p>
+        <!-- CTA 按鈕 -->
+        <div class="flex flex-col sm:flex-row gap-3 justify-center intersect:animate-fadeUp opacity-0">
+          <a
+            href="/cherry"
+            class="inline-block bg-garden-amber hover:bg-amber-700 text-white font-secondary font-semibold px-8 py-3 rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+          >
+            探索園區
+          </a>
+          <a
+            href="/news"
+            class="inline-block glass text-white font-secondary font-semibold px-8 py-3 rounded-2xl transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+          >
+            最新花況
+          </a>
         </div>
+      </div>
+    </div>
+
+    <!-- 向下捲動提示 -->
+    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
+      <svg class="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       四大主題入口
+       ============================================================ -->
+  <section class="section container">
+    <div class="text-center mb-10 intersect:animate-fadeUp opacity-0">
+      <h2 class="text-txt-p dark:text-darkmode-txt-p mb-2">四季精選</h2>
+      <p class="font-secondary text-txt-light dark:text-darkmode-txt-light">
+        探索中台庭園豐富的植物世界
+      </p>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {
+        themes.map((theme) => (
+          <a
+            href={theme.url}
+            class="group relative rounded-3xl overflow-hidden aspect-[4/5] block hover:-translate-y-1 transition-all duration-300 intersect:animate-fadeUp opacity-0"
+            style="opacity:0"
+          >
+            <!-- 背景圖片 -->
+            <div
+              class="absolute inset-0 bg-stone-700 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+              style={`background-image: url('${theme.image}');`}
+            />
+            <!-- 漸層遮罩 -->
+            <div class={`absolute inset-0 bg-gradient-to-t ${theme.color}`} />
+            <!-- 內容 -->
+            <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
+              <div class="text-3xl mb-2">{theme.icon}</div>
+              <h3 class="text-white text-2xl mb-1" style="opacity:1">{theme.title}</h3>
+              <p class="font-secondary text-sm text-stone-200 opacity-90">{theme.subtitle}</p>
+              <div class="mt-3 flex items-center gap-1 text-xs font-secondary text-amber-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                了解更多 →
+              </div>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- ============================================================
+       最新花況
+       ============================================================ -->
+  <section class="section container">
+    <div class="flex items-center justify-between mb-8">
+      <div class="intersect:animate-fadeRight opacity-0">
+        <h2 class="text-txt-p dark:text-darkmode-txt-p mb-1">最新花況</h2>
+        <p class="font-secondary text-txt-light dark:text-darkmode-txt-light text-sm">
+          Garden Updates
+        </p>
+      </div>
+      <a
+        href="/news"
+        class="font-secondary text-sm text-garden-amber dark:text-amber-300 hover:opacity-70 transition intersect:animate-fadeLeft opacity-0"
+        style="opacity:0"
+      >
+        查看全部 →
+      </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {
+        allNews.map((post) => (
+          <a
+            href={`/news/${post.id}`}
+            class="group glass rounded-2xl overflow-hidden hover:-translate-y-1 transition-all duration-300 intersect:animate-fadeUp opacity-0"
+          >
+            <!-- 封面圖 -->
+            <div
+              class="relative w-full h-44 bg-stone-200 dark:bg-stone-700 bg-cover bg-center overflow-hidden"
+              style={post.data.image ? `background-image: url('${post.data.image}');` : ""}
+            >
+              {!post.data.image && (
+                <div class="absolute inset-0 flex items-center justify-center text-stone-400 dark:text-stone-500">
+                  <span class="text-4xl">🌸</span>
+                </div>
+              )}
+              <!-- 分類標籤 -->
+              {post.data.categories && post.data.categories[0] && (
+                <div class="absolute top-3 left-3">
+                  <span class="bg-garden-amber/90 text-white text-xs font-secondary px-2 py-1 rounded-full">
+                    {post.data.categories[0]}
+                  </span>
+                </div>
+              )}
+            </div>
+            <!-- 內容 -->
+            <div class="p-4">
+              {post.data.date && (
+                <p class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light mb-1">
+                  {post.data.date.toLocaleDateString("zh-TW", { year: "numeric", month: "long", day: "numeric" })}
+                </p>
+              )}
+              <h4 class="text-txt-p dark:text-darkmode-txt-p text-base mb-2 line-clamp-2 group-hover:text-garden-amber dark:group-hover:text-amber-300 transition-colors" style="opacity:1">
+                {post.data.title}
+              </h4>
+              {post.data.description && (
+                <p class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light line-clamp-2" style="opacity:1">
+                  {post.data.description}
+                </p>
+              )}
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </section>
+
+  <!-- ============================================================
+       園區資訊
+       ============================================================ -->
+  <section class="section container">
+    <div class="text-center mb-8 intersect:animate-fadeUp opacity-0">
+      <h2 class="text-txt-p dark:text-darkmode-txt-p mb-2">園區資訊</h2>
+      <p class="font-secondary text-txt-light dark:text-darkmode-txt-light text-sm">
+        Visit Information
+      </p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <!-- 開放時間 -->
+      <div class="glass rounded-2xl p-6 text-center intersect:animate-fadeUp opacity-0">
+        <div class="text-3xl mb-3">🕘</div>
+        <h4 class="text-garden-amber dark:text-amber-300 mb-2" style="opacity:1">開放時間</h4>
+        <p class="font-secondary text-sm text-txt-s dark:text-darkmode-txt-s leading-relaxed" style="opacity:1">
+          <!-- 【此處請更換成實際開放時間】 -->
+          週二至週日<br />
+          上午 08:30 ─ 下午 17:30<br />
+          <span class="text-rose-500 dark:text-rose-400">（週一公休）</span>
+        </p>
+      </div>
+
+      <!-- 交通資訊 -->
+      <div class="glass rounded-2xl p-6 text-center intersect:animate-fadeUp opacity-0">
+        <div class="text-3xl mb-3">📍</div>
+        <h4 class="text-garden-amber dark:text-amber-300 mb-2" style="opacity:1">交通資訊</h4>
+        <p class="font-secondary text-sm text-txt-s dark:text-darkmode-txt-s leading-relaxed" style="opacity:1">
+          <!-- 【此處請更換成實際地址與交通說明】 -->
+          此處請填入庭園地址<br />
+          此處請填入附近大眾運輸資訊
+        </p>
+      </div>
+
+      <!-- 聯絡方式 -->
+      <div class="glass rounded-2xl p-6 text-center intersect:animate-fadeUp opacity-0">
+        <div class="text-3xl mb-3">📞</div>
+        <h4 class="text-garden-amber dark:text-amber-300 mb-2" style="opacity:1">聯絡方式</h4>
+        <p class="font-secondary text-sm text-txt-s dark:text-darkmode-txt-s leading-relaxed" style="opacity:1">
+          <!-- 【此處請更換成實際聯絡方式】 -->
+          電話：此處請填入聯絡電話<br />
+          Email：此處請填入電子郵件<br />
+          Line：此處請填入 Line ID
+        </p>
       </div>
     </div>
   </section>
 </BaseLayout>
+

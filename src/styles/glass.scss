@@ -2,30 +2,42 @@
   @apply bg-bg-s dark:bg-darkmode-bg-s;
   @apply backdrop-blur-lg;
   @apply bg-clip-padding backdrop-filter backdrop-saturate-100 backdrop-contrast-100;
-  @apply bg-opacity-30 dark:bg-opacity-30;
-  @apply border border-[rgba(255,255,255,0.6)] dark:border-[rgba(255,255,255,0.15)];
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.25);
+  @apply bg-opacity-70 dark:bg-opacity-50;
+  // 暖琥珀白邊框（亮色），淡暖邊框（暗色）
+  border: 1px solid rgba(255, 237, 213, 0.8);
+  box-shadow: 2px 2px 16px rgba(120, 60, 20, 0.10);
+}
+
+.dark .glass {
+  border: 1px solid rgba(255, 237, 213, 0.12);
+  box-shadow: 2px 2px 16px rgba(0, 0, 0, 0.35);
 }
 
 .glass-t {
   @apply bg-bg-t dark:bg-darkmode-bg-t;
-  @apply bg-opacity-20 dark:bg-opacity-20;
+  @apply bg-opacity-40 dark:bg-opacity-30;
   @apply backdrop-blur;
   @apply bg-clip-padding backdrop-filter backdrop-saturate-100 backdrop-contrast-100;
-  @apply border border-[rgba(255,255,255,0.6)] dark:border-[rgba(255,255,255,0.15)];
-  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 237, 213, 0.6);
+  box-shadow: 2px 2px 8px rgba(120, 60, 20, 0.08);
+}
+
+.dark .glass-t {
+  border: 1px solid rgba(255, 237, 213, 0.10);
 }
 
 .glass-t-borderless {
   @apply bg-bg-t dark:bg-darkmode-bg-t;
-  @apply bg-opacity-20 dark:bg-opacity-20;
+  @apply bg-opacity-40 dark:bg-opacity-30;
   @apply backdrop-blur;
   @apply bg-clip-padding backdrop-filter backdrop-saturate-100 backdrop-contrast-100;
 }
 
-// Gradient
-.gradient {
-  @apply from-transparent via-transparent to-transparent;
-  // @apply from-txt-s via-transparent to-transparent;
-  // @apply dark:from-darkmode-txt-s dark:via-transparent dark:to-transparent;
+// 庭園暖色漸層遮罩（用於 Hero 大圖）
+.garden-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(41, 37, 36, 0.3) 0%,
+    rgba(120, 53, 15, 0.55) 100%
+  );
 }

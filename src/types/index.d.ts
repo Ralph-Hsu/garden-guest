@@ -3,6 +3,14 @@ import type { MarkdownHeading } from "astro";
 
 export type GenericEntry = CollectionEntry<CollectionKey>;
 
+// 中台庭園主題
+export type CherryEntry = CollectionEntry<"cherry">;
+export type LotusEntry = CollectionEntry<"lotus">;
+export type BonsaiEntry = CollectionEntry<"bonsai">;
+export type FloraEntry = CollectionEntry<"flora">;
+export type NewsEntry = CollectionEntry<"news">;
+
+// 原有（保留）
 export type AboutEntry = CollectionEntry<"about">;
 export type AuthorsEntry = CollectionEntry<"authors">;
 export type BlogEntry = CollectionEntry<"blog">;
@@ -17,8 +25,13 @@ export type TermsEntry = CollectionEntry<"terms">;
 export type SearchableEntry =
   | AboutEntry
   | AuthorsEntry
+  | BonsaiEntry
+  | CherryEntry
   | BlogEntry
   | DocsEntry
+  | FloraEntry
+  | LotusEntry
+  | NewsEntry
   | PoetryEntry
   | PortfolioEntry
   | RecipesEntry
@@ -65,4 +78,19 @@ export type MenuItemWithDraft = {
 export type SideNavMenuProps = {
   items: MenuItemWithDraft[];
   level: number;
+};
+
+// 盆栽分盆個體型別
+export type BonsaiSpecimen = {
+  id: string;
+  label: string;
+  image: string;
+  note?: string;
+};
+
+// 櫻花地圖位置型別
+export type CherryMapPosition = {
+  x: number;
+  y: number;
+  label?: string;
 };

@@ -8,40 +8,32 @@ const stickyHeader = true;
 
 const menu = [
   {
-    name: "Home",
+    name: "首頁",
     url: "/",
   },
   {
-    name: "About",
+    name: "園區介紹",
     url: "/about",
   },
   {
-    name: "Docs",
-    url: "/docs",
+    name: "櫻花",
+    url: "/cherry",
   },
   {
-    name: "Blog",
-    url: "/blog",
+    name: "睡蓮",
+    url: "/lotus",
   },
   {
-    name: "Recipes",
-    url: "/recipes",
+    name: "盆栽",
+    url: "/bonsai",
   },
   {
-    name: "Poetry",
-    url: "/poetry",
+    name: "花草",
+    url: "/flora",
   },
   {
-    name: "Index Cards",
-    url: "/index-cards",
-  },
-  {
-    name: "Authors",
-    url: "/authors",
-  },
-  {
-    name: "Portfolio",
-    url: "/portfolio",
+    name: "最新花況",
+    url: "/news",
   },
 ];
 ---
@@ -51,11 +43,20 @@ const menu = [
   class={`container glass py-2 z-30 mb-4 lg:mt-4 lg:rounded-lg ${stickyHeader && "sticky top-0"}`}
 >
   <nav class="relative flex flex-wrap items-center justify-between">
+    <!-- Logo -->
+    <a
+      href="/"
+      class="order-0 font-primary text-xl font-bold text-garden-amber dark:text-amber-300 no-underline mr-4 shrink-0"
+      style="opacity:1 !important;"
+    >
+      中台庭園
+    </a>
+
     <!-- navbar toggler -->
     <input id="nav-toggle" type="checkbox" class="hidden" />
     <label
       for="nav-toggle"
-      class="order-0 cursor-pointer flex items-center md:hidden text-txt-p dark:text-darkmode-txt-p lg:order-1"
+      class="order-2 cursor-pointer flex items-center md:hidden text-txt-p dark:text-darkmode-txt-p lg:order-1"
     >
       <svg id="show-button" class="h-6 fill-current block" viewBox="0 0 20 20">
         <title>Menu Open</title>
@@ -71,16 +72,17 @@ const menu = [
     <!-- /navbar toggler -->
     <ul
       id="nav-menu"
-      class="text-center lg:text-left order-3 hidden w-full pb-6 md:order-1 md:flex md:w-auto md:space-x-2 md:pb-0 lg:space-x-4"
+      class="text-center lg:text-left order-3 hidden w-full pb-6 md:order-1 md:flex md:w-auto md:space-x-1 md:pb-0 lg:space-x-2"
     >
       {
         menu.map((item) => (
-          <li class="">
+          <li>
             <a
               href={item.url}
-              class={`block p-2 font-secondary font-semibold text-txt-p transition dark:text-darkmode-txt-p lg:px-2 lg:py-3 ${
-                (pathname === `${item.url}/` || pathname === item.url) &&
-                "active"
+              class={`block px-2 py-2 font-secondary font-semibold text-sm text-txt-p transition dark:text-darkmode-txt-p lg:px-2 lg:py-3 ${
+                (pathname === `${item.url}/` || pathname === item.url)
+                  ? "text-garden-amber dark:text-amber-300 border-b-2 border-garden-amber dark:border-amber-300"
+                  : "hover:text-garden-amber dark:hover:text-amber-300"
               }`}
             >
               {item.name}
@@ -91,9 +93,10 @@ const menu = [
     </ul>
     <div class="order-1 ml-auto flex items-center md:order-2 lg:ml-0">
       <a
-        class="mr-4 inline-block border-border text-xl text-txt-p dark:border-darkmode-border dark:text-darkmode-txt-p"
+        class="mr-3 inline-block text-xl text-txt-p dark:text-darkmode-txt-p hover:text-garden-amber dark:hover:text-amber-300 transition"
         href="/search"
-        aria-label="search"
+        aria-label="搜尋"
+        style="opacity:1 !important;"
       >
         <IoSearch />
       </a>

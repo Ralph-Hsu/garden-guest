@@ -1,0 +1,184 @@
+---
+import BaseLayout from "@components/base/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const allEntries = (await getCollection("lotus", ({ data }) => !data.draft))
+  .filter((e) => !e.id.endsWith("-index") && e.data.type !== undefined)
+  .sort((a, b) => a.data.order - b.data.order);
+
+const hardyEntries = allEntries.filter(e => e.data.type === "hardy");
+const tropicalEntries = allEntries.filter(e => e.data.type === "tropical");
+---
+
+<BaseLayout title="睡蓮" description="中台庭園豐富的睡蓮世界，寒帶與熱帶品種共逾百種。">
+
+  <!-- Hero -->
+  <section class="relative min-h-[50vh] flex items-center justify-center overflow-hidden -mt-4 mb-0">
+    <div
+      class="absolute inset-0 bg-cover bg-center bg-teal-900"
+      style="background-image: url('/images/lotus/hero.jpg');"
+    />
+    <!-- 【請將睡蓮大圖放置於 /public/images/lotus/hero.jpg】 -->
+    <div class="absolute inset-0 bg-gradient-to-b from-teal-900/40 to-stone-900/60" />
+    <div class="relative z-10 text-center px-4">
+      <div class="glass rounded-3xl px-10 py-8 inline-block intersect:animate-scale opacity-0">
+        <p class="font-secondary text-sm tracking-[0.3em] text-teal-200 uppercase mb-2">Water Lilies</p>
+        <h1 class="text-white mb-2">中台庭園・睡蓮</h1>
+        <p class="font-secondary text-stone-200 text-sm">寒帶 · 熱帶 · 百種風情</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <!-- 分類 Tab 切換 -->
+    <div class="flex gap-3 justify-center mb-8 intersect:animate-fadeDown opacity-0">
+      <button
+        data-tab="hardy"
+        class="lotus-tab font-secondary font-semibold px-6 py-2.5 rounded-full text-sm transition-all duration-300"
+        style="opacity:1"
+      >
+        🧊 寒帶睡蓮（{hardyEntries.length} 種）
+      </button>
+      <button
+        data-tab="tropical"
+        class="lotus-tab font-secondary font-semibold px-6 py-2.5 rounded-full text-sm transition-all duration-300"
+        style="opacity:1"
+      >
+        ☀️ 熱帶睡蓮（{tropicalEntries.length} 種）
+      </button>
+    </div>
+
+    <!-- 寒帶睡蓮 -->
+    <div id="lotus-panel-hardy" class="lotus-panel">
+      <div class="text-center mb-6 intersect:animate-fadeUp opacity-0">
+        <h2 class="text-txt-p dark:text-darkmode-txt-p mb-2">寒帶睡蓮</h2>
+        <p class="font-secondary text-txt-light dark:text-darkmode-txt-light text-sm">
+          <!-- 【此處請更換成寒帶睡蓮的簡介】 -->
+          耐低溫的原生種及改良品種，花期集中於春末至秋初，適應溫帶氣候。
+        </p>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {hardyEntries.map((entry) => (
+          <a
+            href={`/lotus/${entry.id.replace(/^.*\//, "")}`}
+            class="group glass rounded-2xl overflow-hidden hover:-translate-y-1 transition-all duration-300 intersect:animate-fadeUp opacity-0"
+          >
+            <div
+              class="w-full h-36 bg-teal-100 dark:bg-stone-700 bg-cover bg-center overflow-hidden relative"
+              style={entry.data.image ? `background-image: url('${entry.data.image}');` : ""}
+            >
+              {!entry.data.image && (
+                <div class="absolute inset-0 flex items-center justify-center text-3xl">🪷</div>
+              )}
+              {entry.data.color && (
+                <div class="absolute top-2 right-2">
+                  <span class="bg-teal-700/80 text-white text-xs px-2 py-0.5 rounded-full font-secondary backdrop-blur-sm">
+                    {entry.data.color}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div class="p-3">
+              <h4 class="text-txt-p dark:text-darkmode-txt-p text-sm mb-0.5 group-hover:text-garden-amber dark:group-hover:text-amber-300 transition-colors" style="opacity:1">
+                {entry.data.title}
+              </h4>
+              {entry.data.latinName && (
+                <p class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light italic truncate" style="opacity:1">
+                  {entry.data.latinName}
+                </p>
+              )}
+            </div>
+          </a>
+        ))}
+        <!-- 佔位卡片提示 -->
+        <div class="glass rounded-2xl p-4 flex flex-col items-center justify-center text-center border-2 border-dashed border-border dark:border-darkmode-border hover:border-garden-amber dark:hover:border-amber-300 transition-colors cursor-default">
+          <span class="text-2xl mb-2">＋</span>
+          <p class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light" style="opacity:1">
+            更多寒帶品種<br />陸續新增中
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 熱帶睡蓮 -->
+    <div id="lotus-panel-tropical" class="lotus-panel" style="display:none;">
+      <div class="text-center mb-6 intersect:animate-fadeUp opacity-0">
+        <h2 class="text-txt-p dark:text-darkmode-txt-p mb-2">熱帶睡蓮</h2>
+        <p class="font-secondary text-txt-light dark:text-darkmode-txt-light text-sm">
+          <!-- 【此處請更換成熱帶睡蓮的簡介】 -->
+          原產自熱帶地區，花朵碩大、色彩豐富，花梗高挺，夏秋季節盛開最為壯觀。
+        </p>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {tropicalEntries.map((entry) => (
+          <a
+            href={`/lotus/${entry.id.replace(/^.*\//, "")}`}
+            class="group glass rounded-2xl overflow-hidden hover:-translate-y-1 transition-all duration-300 intersect:animate-fadeUp opacity-0"
+          >
+            <div
+              class="w-full h-36 bg-cyan-100 dark:bg-stone-700 bg-cover bg-center overflow-hidden relative"
+              style={entry.data.image ? `background-image: url('${entry.data.image}');` : ""}
+            >
+              {!entry.data.image && (
+                <div class="absolute inset-0 flex items-center justify-center text-3xl">🪷</div>
+              )}
+              {entry.data.color && (
+                <div class="absolute top-2 right-2">
+                  <span class="bg-cyan-700/80 text-white text-xs px-2 py-0.5 rounded-full font-secondary backdrop-blur-sm">
+                    {entry.data.color}
+                  </span>
+                </div>
+              )}
+            </div>
+            <div class="p-3">
+              <h4 class="text-txt-p dark:text-darkmode-txt-p text-sm mb-0.5 group-hover:text-garden-amber dark:group-hover:text-amber-300 transition-colors" style="opacity:1">
+                {entry.data.title}
+              </h4>
+              {entry.data.latinName && (
+                <p class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light italic truncate" style="opacity:1">
+                  {entry.data.latinName}
+                </p>
+              )}
+            </div>
+          </a>
+        ))}
+        <div class="glass rounded-2xl p-4 flex flex-col items-center justify-center text-center border-2 border-dashed border-border dark:border-darkmode-border hover:border-garden-amber dark:hover:border-amber-300 transition-colors cursor-default">
+          <span class="text-2xl mb-2">＋</span>
+          <p class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light" style="opacity:1">
+            更多熱帶品種<br />陸續新增中
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  function initLotusTabs() {
+    const tabs = document.querySelectorAll<HTMLButtonElement>(".lotus-tab");
+    const panels = document.querySelectorAll<HTMLElement>(".lotus-panel");
+
+    function showTab(tabId: string) {
+      panels.forEach(panel => {
+        panel.style.display = panel.id === `lotus-panel-${tabId}` ? "block" : "none";
+      });
+      tabs.forEach(tab => {
+        const isActive = tab.dataset.tab === tabId;
+        tab.className = `lotus-tab font-secondary font-semibold px-6 py-2.5 rounded-full text-sm transition-all duration-300 ${
+          isActive
+            ? "bg-teal-700 text-white shadow-md"
+            : "glass text-txt-p dark:text-darkmode-txt-p hover:text-garden-amber dark:hover:text-amber-300"
+        }`;
+      });
+    }
+
+    tabs.forEach(tab => {
+      tab.addEventListener("click", () => showTab(tab.dataset.tab ?? "hardy"));
+    });
+
+    showTab("hardy");
+  }
+
+  initLotusTabs();
+  document.addEventListener("astro:after-swap", initLotusTabs);
+</script>

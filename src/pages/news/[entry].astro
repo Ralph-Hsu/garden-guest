@@ -1,0 +1,83 @@
+---
+import BaseLayout from "@components/base/BaseLayout.astro";
+import { getCollection, render, type CollectionEntry } from "astro:content";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("news", ({ data }) => !data.draft);
+  return entries
+    .filter((e) => !e.id.endsWith("-index"))
+    .map((entry) => ({
+      params: { entry: entry.id },
+      props: { entry },
+    }));
+}
+
+type Props = { entry: CollectionEntry<"news"> };
+const { entry } = Astro.props;
+const { title, description, date, image, imageAlt, categories, tags } = entry.data;
+const { Content } = await render(entry);
+---
+
+<BaseLayout title={title} description={description}>
+  <!-- Hero -->
+  <section class="relative min-h-[45vh] flex items-end justify-start overflow-hidden -mt-4 mb-0">
+    <div
+      class="absolute inset-0 bg-cover bg-center bg-stone-400"
+      style={image ? `background-image: url('${image}');` : ""}
+    />
+    {!image && (
+      <div class="absolute inset-0 flex items-center justify-center text-8xl">🌸</div>
+    )}
+    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/70 via-stone-900/20 to-transparent" />
+
+    <div class="relative z-10 p-6 md:p-10 max-w-3xl">
+      <a href="/news" class="font-secondary text-xs text-stone-300 hover:text-white mb-4 inline-block transition" style="opacity:1">
+        ← 最新花況
+      </a>
+      <div class="flex flex-wrap gap-2 mb-3">
+        {categories && categories.map(cat => (
+          <span class="bg-garden-amber/90 text-white text-xs font-secondary px-3 py-1 rounded-full">
+            {cat}
+          </span>
+        ))}
+      </div>
+      <h1 class="text-white mb-2 text-h2-sm md:text-h2" style="text-shadow: 0 2px 12px rgba(0,0,0,0.5);">{title}</h1>
+      {date && (
+        <p class="font-secondary text-sm text-stone-300" style="opacity:1">
+          {date.toLocaleDateString("zh-TW", { year: "numeric", month: "long", day: "numeric" })}
+        </p>
+      )}
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="max-w-3xl mx-auto">
+      <!-- 文章內文 -->
+      <div class="glass rounded-2xl p-6 md:p-10 prose prose-stone dark:prose-invert max-w-none intersect:animate-fadeUp opacity-0">
+        <Content />
+      </div>
+
+      <!-- 標籤 -->
+      {tags && tags.length > 0 && (
+        <div class="flex flex-wrap gap-2 mt-6 intersect:animate-fadeUp opacity-0">
+          {tags.map(tag => (
+            <span class="font-secondary text-sm text-garden-amber dark:text-amber-300 bg-amber-50 dark:bg-amber-900/20 px-3 py-1 rounded-full">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <!-- 底部導覽 -->
+      <div class="flex gap-4 justify-between mt-8">
+        <a
+          href="/news"
+          class="glass rounded-xl px-5 py-3 font-secondary text-sm text-txt-p dark:text-darkmode-txt-p hover:text-garden-amber dark:hover:text-amber-300 transition intersect:animate-fadeLeft opacity-0"
+          style="opacity:0"
+        >
+          ← 所有花況
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

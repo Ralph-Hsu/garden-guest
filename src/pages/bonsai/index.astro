@@ -1,0 +1,110 @@
+---
+import BaseLayout from "@components/base/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const entries = (await getCollection("bonsai", ({ data }) => !data.draft))
+  .sort((a, b) => a.data.order - b.data.order);
+
+// 依分類分組
+const byCategory: Record<string, typeof entries> = {};
+entries.forEach(entry => {
+  const cat = entry.data.category ?? "其他";
+  if (!byCategory[cat]) byCategory[cat] = [];
+  byCategory[cat].push(entry);
+});
+---
+
+<BaseLayout title="盆栽" description="欣賞中台庭園精心培育的各式盆栽藝術，每一盆都是歲月的結晶。">
+
+  <!-- Hero -->
+  <section class="relative min-h-[50vh] flex items-center justify-center overflow-hidden -mt-4 mb-0">
+    <div
+      class="absolute inset-0 bg-cover bg-center bg-emerald-900"
+      style="background-image: url('/images/bonsai/hero.jpg');"
+    />
+    <!-- 【請將盆栽大圖放置於 /public/images/bonsai/hero.jpg】 -->
+    <div class="absolute inset-0 bg-gradient-to-b from-emerald-900/40 to-stone-900/60" />
+    <div class="relative z-10 text-center px-4">
+      <div class="glass rounded-3xl px-10 py-8 inline-block intersect:animate-scale opacity-0">
+        <p class="font-secondary text-sm tracking-[0.3em] text-emerald-200 uppercase mb-2">Bonsai Art</p>
+        <h1 class="text-white mb-2">中台庭園・盆栽</h1>
+        <p class="font-secondary text-stone-200 text-sm">歲月刻痕・方寸之間的藝術</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <!-- 簡介 -->
+    <div class="glass rounded-2xl p-6 md:p-8 mb-10 max-w-3xl mx-auto text-center intersect:animate-fadeUp opacity-0">
+      <p class="font-secondary text-txt-s dark:text-darkmode-txt-s leading-relaxed" style="opacity:1">
+        <!-- 【此處請更換成盆栽區的介紹文字】 -->
+        此處請填入中台庭園盆栽區的介紹，說明園區盆栽的規模、特色品種，以及盆栽藝術的文化背景等。
+      </p>
+    </div>
+
+    <!-- 依分類列出品種 -->
+    {Object.entries(byCategory).map(([category, catEntries]) => (
+      <div class="mb-12">
+        <h2 class="text-txt-p dark:text-darkmode-txt-p mb-6 pb-3 border-b border-border dark:border-darkmode-border">
+          {category}
+        </h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {catEntries.map((entry) => (
+            <a
+              href={`/bonsai/${entry.id}`}
+              class="group glass rounded-2xl overflow-hidden hover:-translate-y-1 transition-all duration-300 intersect:animate-fadeUp opacity-0"
+            >
+              <!-- 封面圖 -->
+              <div
+                class="relative w-full h-52 bg-emerald-100 dark:bg-stone-700 bg-cover bg-center overflow-hidden"
+                style={entry.data.image ? `background-image: url('${entry.data.image}');` : ""}
+              >
+                {!entry.data.image && (
+                  <div class="absolute inset-0 flex items-center justify-center text-5xl">🌿</div>
+                )}
+                <!-- 分盆數量標記 -->
+                {entry.data.specimens && entry.data.specimens.length > 0 && (
+                  <div class="absolute bottom-3 right-3">
+                    <span class="bg-black/50 text-white text-xs font-secondary px-2 py-1 rounded-full backdrop-blur-sm">
+                      {entry.data.specimens.length} 盆展示
+                    </span>
+                  </div>
+                )}
+                <div class="absolute inset-0 bg-gradient-to-t from-stone-900/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              </div>
+
+              <!-- 文字 -->
+              <div class="p-4">
+                <h4 class="text-txt-p dark:text-darkmode-txt-p mb-1 group-hover:text-garden-emerald dark:group-hover:text-emerald-400 transition-colors" style="opacity:1">
+                  {entry.data.title}
+                </h4>
+                {entry.data.latinName && (
+                  <p class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light italic mb-2" style="opacity:1">
+                    {entry.data.latinName}
+                  </p>
+                )}
+                <div class="flex items-center justify-between">
+                  {entry.data.category && (
+                    <span class="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-800 dark:text-emerald-300 text-xs font-secondary px-2 py-0.5 rounded-full">
+                      {entry.data.category}
+                    </span>
+                  )}
+                  <span class="font-secondary text-xs text-garden-amber dark:text-amber-300 opacity-0 group-hover:opacity-100 transition-opacity">
+                    查看詳情 →
+                  </span>
+                </div>
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    ))}
+
+    <!-- 更多品種提示 -->
+    <div class="glass rounded-2xl p-8 text-center intersect:animate-fadeUp opacity-0">
+      <p class="font-secondary text-txt-light dark:text-darkmode-txt-light text-sm" style="opacity:1">
+        🌿 更多盆栽品種持續新增中，歡迎蒞臨中台庭園親身欣賞
+      </p>
+    </div>
+  </section>
+</BaseLayout>

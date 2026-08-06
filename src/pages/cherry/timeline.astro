@@ -1,0 +1,229 @@
+---
+import BaseLayout from "@components/base/BaseLayout.astro";
+
+// ================================================================
+// 花期時序表資料
+// 【請依照實際花況資料更新以下數值】
+// startDay/endDay：一年中的第幾天（1～365）
+// 例：1月1日 = 1，2月1日 = 32，3月1日 = 60，4月1日 = 91
+// ================================================================
+const BLOOM_DATA: Record<string, {
+  variety: string;
+  color: string;
+  years: Record<number, { start: number; end: number; peak: number }>;
+}> = {
+  kawazu:        { variety: "河津櫻",   color: "#f472b6", years: { 2015: { start: 20, end: 45, peak: 32 }, 2016: { start: 18, end: 42, peak: 30 } } },
+  formosana:     { variety: "福爾摩沙", color: "#ef4444", years: { 2015: { start: 25, end: 50, peak: 37 }, 2016: { start: 23, end: 48, peak: 35 } } },
+  tsubakikanzan: { variety: "椿寒櫻",   color: "#e11d48", years: { 2015: { start: 15, end: 38, peak: 26 }, 2016: { start: 14, end: 36, peak: 24 } } },
+  fuji:          { variety: "富士櫻",   color: "#fbcfe8", years: { 2015: { start: 55, end: 78, peak: 66 }, 2016: { start: 52, end: 75, peak: 63 } } },
+  shidare:       { variety: "枝垂櫻",   color: "#f9a8d4", years: { 2015: { start: 50, end: 75, peak: 62 }, 2016: { start: 48, end: 72, peak: 60 } } },
+  yae:           { variety: "八重櫻",   color: "#db2777", years: { 2015: { start: 72, end: 100, peak: 86 }, 2016: { start: 70, end: 98, peak: 84 } } },
+  sumizome:      { variety: "墨染櫻",   color: "#fce7f3", years: { 2016: { start: 62, end: 82, peak: 72 } } },
+  // 【請依照實際資料更新以上數值，startDay/endDay 為一年中第幾天】
+};
+
+const YEARS = [2015, 2016];
+
+// 顯示的日期範圍（一年的第幾天）
+const DISPLAY_START = 1;    // 1月1日
+const DISPLAY_END = 120;    // 4月30日
+
+// 生成月份標籤
+function getDayLabel(day: number): string {
+  const date = new Date(2025, 0, day); // 使用非閏年
+  return `${date.getMonth() + 1}/${date.getDate()}`;
+}
+
+// 月份刻度
+const MONTH_MARKS = [
+  { day: 1,  label: "1月" },
+  { day: 32, label: "2月" },
+  { day: 60, label: "3月" },
+  { day: 91, label: "4月" },
+  { day: 121, label: "5月" },
+].filter(m => m.day >= DISPLAY_START && m.day <= DISPLAY_END);
+
+const TOTAL_DAYS = DISPLAY_END - DISPLAY_START;
+
+function toPercent(day: number): number {
+  return ((day - DISPLAY_START) / TOTAL_DAYS) * 100;
+}
+---
+
+<BaseLayout title="花期時序表" description="中台庭園歷年各品種實際開花紀錄，以 Gantt 圖呈現。">
+
+  <section class="relative min-h-[40vh] flex items-center justify-center overflow-hidden -mt-4 mb-0">
+    <div class="absolute inset-0 bg-gradient-to-b from-rose-900/50 to-stone-900/60" />
+    <div class="relative z-10 text-center px-4">
+      <div class="glass rounded-3xl px-10 py-8 inline-block intersect:animate-scale opacity-0">
+        <p class="font-secondary text-sm tracking-[0.3em] text-rose-200 uppercase mb-2">Bloom Timeline</p>
+        <h1 class="text-white mb-2">花期時序表</h1>
+        <p class="font-secondary text-stone-200 text-sm">歷年各品種實際開花紀錄</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="max-w-5xl mx-auto">
+
+      <!-- 年份切換 -->
+      <div class="flex gap-2 justify-center mb-8 intersect:animate-fadeDown opacity-0">
+        {YEARS.map((year) => (
+          <button
+            data-year={year}
+            class="year-btn font-secondary font-semibold px-6 py-2 rounded-full transition-all duration-300 text-sm"
+            style="opacity:1"
+          >
+            {year} 年
+          </button>
+        ))}
+      </div>
+
+      <!-- Gantt 圖表 -->
+      {YEARS.map((year) => (
+        <div
+          id={`timeline-${year}`}
+          class="timeline-panel glass rounded-2xl p-6 md:p-8 mb-4 intersect:animate-fadeUp opacity-0"
+          style="display:none;"
+        >
+          <h3 class="text-txt-p dark:text-darkmode-txt-p mb-6 text-center">{year} 年 花期紀錄</h3>
+
+          <!-- 月份標尺 -->
+          <div class="relative mb-3 ml-28">
+            <div class="relative h-6">
+              {MONTH_MARKS.map((mark) => (
+                <div
+                  class="absolute top-0 flex flex-col items-center"
+                  style={`left: ${toPercent(mark.day)}%;`}
+                >
+                  <div class="w-px h-3 bg-border dark:bg-darkmode-border" />
+                  <span class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light mt-0.5 -translate-x-1/2 whitespace-nowrap">
+                    {mark.label}
+                  </span>
+                </div>
+              ))}
+              <!-- 橫向基準線 -->
+              <div class="absolute bottom-0 left-0 right-0 h-px bg-border dark:bg-darkmode-border" />
+            </div>
+          </div>
+
+          <!-- 品種橫條 -->
+          <div class="space-y-3">
+            {Object.entries(BLOOM_DATA).map(([id, data]) => {
+              const yearData = data.years[year];
+              return (
+                <div class="flex items-center gap-3">
+                  <!-- 品種名稱 -->
+                  <a
+                    href={`/cherry/${id}`}
+                    class="w-24 text-right font-secondary text-sm text-txt-s dark:text-darkmode-txt-s hover:text-garden-amber dark:hover:text-amber-300 transition shrink-0"
+                    style="opacity:1"
+                  >
+                    {data.variety}
+                  </a>
+
+                  <!-- 條狀圖區域 -->
+                  <div class="flex-1 relative h-8">
+                    <!-- 背景底色 -->
+                    <div class="absolute inset-0 rounded-lg bg-stone-100/50 dark:bg-stone-800/50" />
+
+                    {yearData ? (
+                      <>
+                        {/* 開花期橫條 */}
+                        <div
+                          class="absolute top-1 bottom-1 rounded-full opacity-80 hover:opacity-100 transition-opacity cursor-pointer"
+                          style={`
+                            left: ${toPercent(yearData.start)}%;
+                            width: ${toPercent(yearData.end) - toPercent(yearData.start)}%;
+                            background-color: ${data.color};
+                          `}
+                          title={`${data.variety}：${getDayLabel(yearData.start)} ～ ${getDayLabel(yearData.end)}`}
+                        />
+                        {/* 盛開期標記 */}
+                        <div
+                          class="absolute top-0 bottom-0 w-0.5 bg-white/70"
+                          style={`left: ${toPercent(yearData.peak)}%;`}
+                          title={`盛開：${getDayLabel(yearData.peak)}`}
+                        />
+                      </>
+                    ) : (
+                      <div class="absolute inset-0 flex items-center justify-center">
+                        <span class="font-secondary text-xs text-stone-400 dark:text-stone-500">─ 無紀錄 ─</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <!-- 圖例 -->
+          <div class="flex flex-wrap gap-4 mt-6 pt-4 border-t border-border dark:border-darkmode-border">
+            <div class="flex items-center gap-2">
+              <div class="w-8 h-3 rounded-full bg-rose-400 opacity-80" />
+              <span class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light">花期區間</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <div class="w-0.5 h-4 bg-stone-400" />
+              <span class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light">盛開高峰</span>
+            </div>
+            <p class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light ml-auto">
+              <!-- 【此處可填入資料來源說明】 -->
+              資料來源：中台庭園實際觀測紀錄
+            </p>
+          </div>
+
+          <!-- 備注 -->
+          <p class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light mt-3 text-center" style="opacity:1">
+            <!-- 【請依照實際資料更新花期數值】 -->
+            ※ 以上為園區歷年實際觀測資料，實際花期受年度氣候影響可能有所差異。
+          </p>
+        </div>
+      ))}
+
+      <div class="text-center mt-4">
+        <a href="/cherry" class="inline-block font-secondary text-sm text-garden-amber dark:text-amber-300 hover:opacity-70 transition intersect:animate-fadeUp opacity-0" style="opacity:0">
+          ← 回到櫻花總覽
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  function initTimeline() {
+    const buttons = document.querySelectorAll<HTMLButtonElement>(".year-btn");
+    const panels = document.querySelectorAll<HTMLElement>(".timeline-panel");
+    const years = Array.from(buttons).map(b => b.dataset.year ?? "");
+
+    function showYear(year: string) {
+      panels.forEach(panel => {
+        panel.style.display = panel.id === `timeline-${year}` ? "block" : "none";
+      });
+      buttons.forEach(btn => {
+        const isActive = btn.dataset.year === year;
+        btn.className = `year-btn font-secondary font-semibold px-6 py-2 rounded-full transition-all duration-300 text-sm ${
+          isActive
+            ? "bg-garden-amber text-white shadow-md"
+            : "glass text-txt-p dark:text-darkmode-txt-p hover:text-garden-amber dark:hover:text-amber-300"
+        }`;
+      });
+    }
+
+    buttons.forEach(btn => {
+      btn.addEventListener("click", () => showYear(btn.dataset.year ?? ""));
+    });
+
+    // 預設顯示最新年份
+    if (years[years.length - 1]) {
+      showYear(years[years.length - 1]);
+    }
+  }
+
+  initTimeline();
+  document.addEventListener("astro:after-swap", initTimeline);
+</script>
+
+<style>
+  .garden-amber { color: #92400e; }
+</style>

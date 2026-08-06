@@ -1,0 +1,297 @@
+---
+/**
+ * CherryMap — GSAP ScrollTrigger 滾動故事地圖
+ * 
+ * 使用說明：
+ * 1. 將園區地圖圖片放置於 /public/images/cherry/garden-map.jpg
+ *    （建議尺寸：1600×900px 或以上，橫向構圖）
+ * 
+ * 2. 在下方 MAP_STEPS 陣列中，依據你的地圖設定各品種的位置（x, y 百分比）
+ *    x: 0 = 最左邊，100 = 最右邊
+ *    y: 0 = 最上方，100 = 最下方
+ * 
+ * 3. 每個步驟的 scale/x/y 決定地圖縮放到該品種位置時的視角
+ */
+import type { CherryEntry } from "@/types";
+
+interface Props {
+  entries: CherryEntry[];
+}
+
+const { entries } = Astro.props;
+
+// ================================================================
+// 地圖步驟設定
+// 請依照你的地圖圖片調整每個步驟的 scale 和位移（單位：百分比）
+// ================================================================
+const MAP_STEPS = [
+  {
+    id: "overview",
+    label: "園區全覽",
+    description: "中台庭園七大櫻花品種分佈全覽",
+    scale: 1,
+    x: 0,
+    y: 0,
+    entryId: null,
+  },
+  {
+    id: "kawazu",
+    label: "河津櫻區",
+    description: "一月下旬率先盛開，迎接春天的使者",
+    scale: 1.8,
+    x: -15,   // 【請依照地圖調整此數值】向左偏移百分比
+    y: -8,    // 【請依照地圖調整此數值】向上偏移百分比
+    entryId: "kawazu",
+  },
+  {
+    id: "formosana",
+    label: "福爾摩沙區",
+    description: "台灣原生種，緋紅鐘型花朵",
+    scale: 1.8,
+    x: 8,     // 【請依照地圖調整此數值】
+    y: -15,   // 【請依照地圖調整此數值】
+    entryId: "formosana",
+  },
+  {
+    id: "tsubakikanzan",
+    label: "椿寒櫻區",
+    description: "寒冬中的玫瑰紅燃放",
+    scale: 1.8,
+    x: 18,    // 【請依照地圖調整此數值】
+    y: 8,     // 【請依照地圖調整此數值】
+    entryId: "tsubakikanzan",
+  },
+  {
+    id: "fuji",
+    label: "富士櫻區",
+    description: "淡粉白花朵，如雪般輕盈",
+    scale: 1.8,
+    x: -8,    // 【請依照地圖調整此數值】
+    y: 18,    // 【請依照地圖調整此數值】
+    entryId: "fuji",
+  },
+  {
+    id: "shidare",
+    label: "枝垂櫻區",
+    description: "瀑布般垂落的粉紅花簾",
+    scale: 1.8,
+    x: 22,    // 【請依照地圖調整此數值】
+    y: -5,    // 【請依照地圖調整此數值】
+    entryId: "shidare",
+  },
+  {
+    id: "yae",
+    label: "八重櫻區",
+    description: "層疊繁複，春末壓軸貴族",
+    scale: 1.8,
+    x: -5,    // 【請依照地圖調整此數值】
+    y: 22,    // 【請依照地圖調整此數值】
+    entryId: "yae",
+  },
+  {
+    id: "sumizome",
+    label: "墨染櫻區",
+    description: "白如霜雪，清冷脫俗",
+    scale: 1.8,
+    x: 28,    // 【請依照地圖調整此數值】
+    y: 15,    // 【請依照地圖調整此數值】
+    entryId: "sumizome",
+  },
+  {
+    id: "final",
+    label: "園區全覽",
+    description: "感謝您探索中台庭園的七大櫻花品種",
+    scale: 1,
+    x: 0,
+    y: 0,
+    entryId: null,
+  },
+];
+
+// 建立 entryId → entry 映射
+const entryMap = Object.fromEntries(entries.map((e) => [e.id, e]));
+---
+
+<section id="cherry-map-section" class="relative py-16 overflow-hidden">
+  <div class="container mb-8 text-center">
+    <h2 class="text-txt-p dark:text-darkmode-txt-p mb-2 intersect:animate-fadeUp opacity-0">
+      園區分佈導覽
+    </h2>
+    <p class="font-secondary text-txt-light dark:text-darkmode-txt-light text-sm intersect:animate-fade opacity-0">
+      向下捲動，跟著路線探索七大品種的位置
+    </p>
+  </div>
+
+  <!-- Scrollytelling 容器 -->
+  <div id="cherry-scroll-container" class="relative">
+    <!-- 地圖圖片（sticky 固定在視窗中央）-->
+    <div
+      id="cherry-map-sticky"
+      class="sticky top-16 h-[70vh] overflow-hidden rounded-2xl mx-auto max-w-4xl shadow-2xl"
+    >
+      <!-- 地圖圖片
+           【請將園區地圖放置於 /public/images/cherry/garden-map.jpg】 -->
+      <div
+        id="cherry-map-image"
+        class="w-full h-full bg-stone-200 dark:bg-stone-700 bg-cover bg-center transition-transform duration-700 ease-out"
+        style="background-image: url('/images/cherry/garden-map.jpg');"
+      >
+        <!-- 未放置地圖圖片時的備援畫面 -->
+        <div id="cherry-map-placeholder" class="w-full h-full flex flex-col items-center justify-center text-stone-400 dark:text-stone-500">
+          <div class="text-6xl mb-4">🗺️</div>
+          <p class="font-secondary text-sm text-center max-w-xs">
+            請將園區地圖圖片放置於<br />
+            <code class="bg-stone-100 dark:bg-stone-800 px-1 rounded">/public/images/cherry/garden-map.jpg</code>
+          </p>
+        </div>
+      </div>
+
+      <!-- 品種熱點標記（由 JS 動態顯示）-->
+      <div id="cherry-map-markers" class="absolute inset-0 pointer-events-none">
+        {entries.filter(e => e.data.mapPosition).map((entry) => (
+          <a
+            href={`/cherry/${entry.id}`}
+            data-marker={entry.id}
+            class="cherry-marker absolute pointer-events-auto opacity-0 transition-all duration-500"
+            style={`left: ${entry.data.mapPosition!.x}%; top: ${entry.data.mapPosition!.y}%; transform: translate(-50%, -50%);`}
+          >
+            <div class="group relative">
+              <!-- 脈衝動畫圓點 -->
+              <div class="absolute -inset-3 bg-rose-400/30 rounded-full animate-ping" />
+              <div class="relative bg-rose-500 hover:bg-garden-amber text-white text-xs font-secondary px-3 py-1.5 rounded-full shadow-lg whitespace-nowrap transition-colors duration-200 flex items-center gap-1">
+                <span>🌸</span>
+                <span>{entry.data.title}</span>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      <!-- 步驟說明覆蓋卡片 -->
+      <div
+        id="cherry-step-card"
+        class="absolute bottom-4 left-4 glass rounded-xl p-4 max-w-xs transition-all duration-500"
+      >
+        <h4 id="cherry-step-label" class="text-txt-p dark:text-darkmode-txt-p text-base mb-1" style="opacity:1">
+          園區全覽
+        </h4>
+        <p id="cherry-step-desc" class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light" style="opacity:1">
+          中台庭園七大櫻花品種分佈全覽
+        </p>
+      </div>
+
+      <!-- 進度指示器 -->
+      <div class="absolute top-4 right-4 flex gap-1.5">
+        {MAP_STEPS.map((step, i) => (
+          <div
+            data-progress={i}
+            class="cherry-progress w-2 h-2 rounded-full bg-white/40 transition-all duration-300"
+          />
+        ))}
+      </div>
+    </div>
+
+    <!-- 捲動空間（每個步驟佔 100vh）-->
+    <div id="cherry-scroll-spacer">
+      {MAP_STEPS.map((step, i) => (
+        <div
+          data-step={i}
+          class="cherry-step-trigger h-screen flex items-center"
+          aria-hidden="true"
+        />
+      ))}
+    </div>
+  </div>
+</section>
+
+<script>
+  import { gsap } from "gsap";
+  import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  function initCherryMap() {
+    const container = document.getElementById("cherry-scroll-container");
+    const mapImage = document.getElementById("cherry-map-image");
+    const stepLabel = document.getElementById("cherry-step-label");
+    const stepDesc = document.getElementById("cherry-step-desc");
+    const stepTriggers = document.querySelectorAll(".cherry-step-trigger");
+    const progressDots = document.querySelectorAll(".cherry-progress");
+
+    if (!container || !mapImage || !stepTriggers.length) return;
+
+    // 定義各步驟的地圖動畫參數
+    // 【說明】scale：縮放倍率，x/y：位移百分比（向左/上為負值）
+    const steps = [
+      { scale: 1,   x: "0%",    y: "0%",    label: "園區全覽",   desc: "中台庭園七大櫻花品種分佈全覽",       markers: [] },
+      { scale: 1.8, x: "-15%",  y: "-8%",   label: "河津櫻區",   desc: "一月下旬率先盛開，迎接春天的使者",   markers: ["kawazu"] },
+      { scale: 1.8, x: "8%",    y: "-15%",  label: "福爾摩沙區", desc: "台灣原生種，緋紅鐘型花朵",           markers: ["kawazu", "formosana"] },
+      { scale: 1.8, x: "18%",   y: "8%",    label: "椿寒櫻區",   desc: "寒冬中的玫瑰紅燃放",               markers: ["kawazu", "formosana", "tsubakikanzan"] },
+      { scale: 1.8, x: "-8%",   y: "18%",   label: "富士櫻區",   desc: "淡粉白花朵，如雪般輕盈",           markers: ["kawazu", "formosana", "tsubakikanzan", "fuji"] },
+      { scale: 1.8, x: "22%",   y: "-5%",   label: "枝垂櫻區",   desc: "瀑布般垂落的粉紅花簾",             markers: ["kawazu", "formosana", "tsubakikanzan", "fuji", "shidare"] },
+      { scale: 1.8, x: "-5%",   y: "22%",   label: "八重櫻區",   desc: "層疊繁複，春末壓軸貴族",           markers: ["kawazu", "formosana", "tsubakikanzan", "fuji", "shidare", "yae"] },
+      { scale: 1.8, x: "28%",   y: "15%",   label: "墨染櫻區",   desc: "白如霜雪，清冷脫俗",               markers: ["kawazu", "formosana", "tsubakikanzan", "fuji", "shidare", "yae", "sumizome"] },
+      { scale: 1,   x: "0%",    y: "0%",    label: "探索完成",   desc: "感謝您探索中台庭園的七大櫻花品種",   markers: ["kawazu", "formosana", "tsubakikanzan", "fuji", "shidare", "yae", "sumizome"] },
+    ];
+
+    let currentStep = 0;
+
+    function goToStep(index: number) {
+      if (index === currentStep && index !== 0) return;
+      const step = steps[Math.min(index, steps.length - 1)];
+
+      // 動畫地圖
+      gsap.to(mapImage, {
+        scale: step.scale,
+        x: step.x,
+        y: step.y,
+        duration: 0.8,
+        ease: "power2.inOut",
+      });
+
+      // 更新說明卡
+      if (stepLabel) stepLabel.textContent = step.label;
+      if (stepDesc) stepDesc.textContent = step.desc;
+
+      // 更新進度點
+      progressDots.forEach((dot, i) => {
+        dot.classList.toggle("bg-white", i <= index);
+        dot.classList.toggle("bg-white/40", i > index);
+        dot.classList.toggle("scale-125", i === index);
+      });
+
+      // 顯示/隱藏標記
+      const allMarkers = document.querySelectorAll(".cherry-marker");
+      allMarkers.forEach((marker) => {
+        const markerId = (marker as HTMLElement).dataset.marker;
+        const shouldShow = step.markers.includes(markerId ?? "");
+        gsap.to(marker, {
+          opacity: shouldShow ? 1 : 0,
+          scale: shouldShow ? 1 : 0.8,
+          duration: 0.4,
+          ease: "back.out(1.7)",
+        });
+      });
+
+      currentStep = index;
+    }
+
+    // 為每個步驟建立 ScrollTrigger
+    stepTriggers.forEach((trigger, index) => {
+      ScrollTrigger.create({
+        trigger: trigger,
+        start: "top center",
+        end: "bottom center",
+        onEnter: () => goToStep(index),
+        onEnterBack: () => goToStep(index),
+      });
+    });
+
+    // 初始化
+    goToStep(0);
+  }
+
+  // 頁面載入與路由切換後都初始化
+  initCherryMap();
+  document.addEventListener("astro:after-swap", initCherryMap);
+</script>

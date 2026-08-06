@@ -1,0 +1,132 @@
+---
+import BaseLayout from "@components/base/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+const entries = (await getCollection("flora", ({ data }) => !data.draft))
+  .sort((a, b) => a.data.order - b.data.order);
+
+const plantTypes = ["草本", "藤本", "小灌木"] as const;
+---
+
+<BaseLayout title="花草" description="中台庭園近百種草本、藤本與小灌木花草，芬芳四溢。">
+
+  <!-- Hero -->
+  <section class="relative min-h-[50vh] flex items-center justify-center overflow-hidden -mt-4 mb-0">
+    <div
+      class="absolute inset-0 bg-cover bg-center bg-amber-900"
+      style="background-image: url('/images/flora/hero.jpg');"
+    />
+    <!-- 【請將花草大圖放置於 /public/images/flora/hero.jpg】 -->
+    <div class="absolute inset-0 bg-gradient-to-b from-amber-900/40 to-stone-900/60" />
+    <div class="relative z-10 text-center px-4">
+      <div class="glass rounded-3xl px-10 py-8 inline-block intersect:animate-scale opacity-0">
+        <p class="font-secondary text-sm tracking-[0.3em] text-amber-200 uppercase mb-2">Garden Flora</p>
+        <h1 class="text-white mb-2">中台庭園・花草</h1>
+        <p class="font-secondary text-stone-200 text-sm">草本 · 藤本 · 小灌木 · 近百品種</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <!-- 篩選按鈕 -->
+    <div class="flex flex-wrap gap-2 justify-center mb-8 intersect:animate-fadeDown opacity-0">
+      <button
+        data-filter="all"
+        class="flora-filter font-secondary text-sm px-5 py-2 rounded-full transition-all duration-300"
+        style="opacity:1"
+      >
+        全部（{entries.length}）
+      </button>
+      {plantTypes.map(type => {
+        const count = entries.filter(e => e.data.plantType === type).length;
+        return count > 0 ? (
+          <button
+            data-filter={type}
+            class="flora-filter font-secondary text-sm px-5 py-2 rounded-full transition-all duration-300"
+            style="opacity:1"
+          >
+            {type}（{count}）
+          </button>
+        ) : null;
+      })}
+    </div>
+
+    <!-- 花草 Grid -->
+    <div id="flora-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">
+      {entries.map((entry) => (
+        <a
+          href={`/flora/${entry.id}`}
+          data-type={entry.data.plantType ?? "其他"}
+          class="flora-item group glass rounded-xl overflow-hidden hover:-translate-y-1 transition-all duration-300 intersect:animate-fadeUp opacity-0"
+        >
+          <!-- 圖片 -->
+          <div
+            class="w-full aspect-square bg-amber-100 dark:bg-stone-700 bg-cover bg-center relative overflow-hidden"
+            style={entry.data.image ? `background-image: url('${entry.data.image}');` : ""}
+          >
+            {!entry.data.image && (
+              <div class="absolute inset-0 flex items-center justify-center text-3xl">🌺</div>
+            )}
+            {entry.data.plantType && (
+              <div class="absolute bottom-1 left-1">
+                <span class="bg-black/40 text-white text-[10px] px-1.5 py-0.5 rounded font-secondary backdrop-blur-sm">
+                  {entry.data.plantType}
+                </span>
+              </div>
+            )}
+          </div>
+          <!-- 名稱 -->
+          <div class="p-2.5">
+            <h4 class="text-txt-p dark:text-darkmode-txt-p text-sm leading-snug group-hover:text-garden-amber dark:group-hover:text-amber-300 transition-colors" style="opacity:1">
+              {entry.data.title}
+            </h4>
+            {entry.data.latinName && (
+              <p class="font-secondary text-[10px] text-txt-light dark:text-darkmode-txt-light italic truncate mt-0.5" style="opacity:1">
+                {entry.data.latinName}
+              </p>
+            )}
+          </div>
+        </a>
+      ))}
+
+      <!-- 佔位提示 -->
+      <div class="flora-item glass rounded-xl p-3 flex flex-col items-center justify-center text-center border-2 border-dashed border-border dark:border-darkmode-border" data-type="placeholder">
+        <span class="text-xl mb-1">＋</span>
+        <p class="font-secondary text-[10px] text-txt-light dark:text-darkmode-txt-light" style="opacity:1">更多品種<br />陸續新增</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  function initFloraFilter() {
+    const filterBtns = document.querySelectorAll<HTMLButtonElement>(".flora-filter");
+    const items = document.querySelectorAll<HTMLElement>(".flora-item");
+
+    function setFilter(filter: string) {
+      items.forEach(item => {
+        if (item.dataset.type === "placeholder") return;
+        const match = filter === "all" || item.dataset.type === filter;
+        item.style.display = match ? "" : "none";
+      });
+
+      filterBtns.forEach(btn => {
+        const isActive = btn.dataset.filter === filter;
+        btn.className = `flora-filter font-secondary text-sm px-5 py-2 rounded-full transition-all duration-300 ${
+          isActive
+            ? "bg-garden-amber text-white shadow-md"
+            : "glass text-txt-p dark:text-darkmode-txt-p hover:text-garden-amber dark:hover:text-amber-300"
+        }`;
+      });
+    }
+
+    filterBtns.forEach(btn => {
+      btn.addEventListener("click", () => setFilter(btn.dataset.filter ?? "all"));
+    });
+
+    setFilter("all");
+  }
+
+  initFloraFilter();
+  document.addEventListener("astro:after-swap", initFloraFilter);
+</script>

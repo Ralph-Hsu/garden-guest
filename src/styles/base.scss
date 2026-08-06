@@ -15,7 +15,6 @@ h4,
 h5,
 h6 {
   @apply font-primary font-bold leading-tight text-txt-p dark:text-darkmode-txt-p intersect:animate-fade opacity-0;
-  // @apply font-primary font-bold leading-tight bg-gradient-to-r from-orange-500 via-indigo-500 to-green-500 text-transparent bg-clip-text;
 }
 h1,
 .h1 {
@@ -75,18 +74,8 @@ input[type=number] {
   -moz-appearance: textfield;
 }
 
-.katex {
-  .base {
-    @apply text-txt-s dark:text-darkmode-txt-s;
-  }
-}
-
 html.dark .astro-code,
 html.dark .astro-code span {
   color: var(--shiki-dark) !important;
   background-color: var(--shiki-dark-bg) !important;
 }
-
-// code {
-//   @apply after:border-none;
-// }

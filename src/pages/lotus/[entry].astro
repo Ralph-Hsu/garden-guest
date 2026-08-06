@@ -1,0 +1,74 @@
+---
+import BaseLayout from "@components/base/BaseLayout.astro";
+import { getCollection, render, type CollectionEntry } from "astro:content";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("lotus", ({ data }) => !data.draft);
+  return entries
+    .filter((e) => !e.id.endsWith("-index") && e.data.type !== undefined)
+    .map((entry) => ({
+      params: { entry: entry.id.replace(/^.*\//, "") },
+      props: { entry },
+    }));
+}
+
+type Props = { entry: CollectionEntry<"lotus"> };
+const { entry } = Astro.props;
+const { title, latinName, type, bloomSeason, color, image, description } = entry.data;
+const { Content } = await render(entry);
+
+const typeLabel = type === "hardy" ? "寒帶睡蓮" : type === "tropical" ? "熱帶睡蓮" : "";
+const typeColor = type === "hardy" ? "bg-teal-700/80" : "bg-cyan-700/80";
+---
+
+<BaseLayout title={title} description={description}>
+  <!-- Hero -->
+  <section class="relative min-h-[55vh] flex items-end justify-start overflow-hidden -mt-4 mb-0">
+    <div
+      class="absolute inset-0 bg-cover bg-center bg-teal-900"
+      style={image ? `background-image: url('${image}');` : ""}
+    />
+    {!image && (
+      <div class="absolute inset-0 flex items-center justify-center text-8xl">🪷</div>
+    )}
+    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/70 via-stone-900/20 to-transparent" />
+
+    <div class="relative z-10 p-6 md:p-10 max-w-2xl">
+      <a href="/lotus" class="font-secondary text-xs text-stone-300 hover:text-white mb-4 inline-block transition" style="opacity:1">
+        ← 回到睡蓮總覽
+      </a>
+      <h1 class="text-white mb-1" style="text-shadow: 0 2px 12px rgba(0,0,0,0.5);">{title}</h1>
+      {latinName && (
+        <p class="font-secondary italic text-stone-300 text-sm mb-3" style="opacity:1">{latinName}</p>
+      )}
+      <div class="flex flex-wrap gap-2">
+        <span class={`${typeColor} text-white text-xs font-secondary px-3 py-1 rounded-full backdrop-blur-sm`}>
+          {typeLabel}
+        </span>
+        {color && (
+          <span class="bg-stone-900/50 text-white text-xs font-secondary px-3 py-1 rounded-full backdrop-blur-sm">
+            🌸 {color}
+          </span>
+        )}
+        {bloomSeason && (
+          <span class="bg-garden-amber/80 text-white text-xs font-secondary px-3 py-1 rounded-full backdrop-blur-sm">
+            🗓 {bloomSeason}
+          </span>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <section class="section container">
+    <div class="max-w-3xl mx-auto">
+      <div class="glass rounded-2xl p-6 md:p-10 prose prose-stone dark:prose-invert max-w-none intersect:animate-fadeUp opacity-0">
+        <Content />
+      </div>
+      <div class="flex gap-4 justify-between mt-6">
+        <a href="/lotus" class="glass rounded-xl px-5 py-3 font-secondary text-sm text-txt-p dark:text-darkmode-txt-p hover:text-garden-amber dark:hover:text-amber-300 transition intersect:animate-fadeLeft opacity-0" style="opacity:0">
+          ← 所有睡蓮品種
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

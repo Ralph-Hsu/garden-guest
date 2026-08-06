@@ -1,0 +1,109 @@
+---
+import BaseLayout from "@components/base/BaseLayout.astro";
+import { getCollection, render, type CollectionEntry } from "astro:content";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("cherry", ({ data }) => !data.draft);
+  return entries
+    .filter((e) => !e.id.endsWith("-index"))
+    .map((entry) => ({
+      params: { entry: entry.id },
+      props: { entry },
+    }));
+}
+
+type Props = { entry: CollectionEntry<"cherry"> };
+const { entry } = Astro.props;
+const { title, latinName, bloomSeason, color, image, gallery, description, mapPosition } = entry.data;
+const { Content } = await render(entry);
+---
+
+<BaseLayout title={title} description={description}>
+  <!-- Hero 大圖區 -->
+  <section class="relative min-h-[55vh] flex items-end justify-start overflow-hidden -mt-4 mb-0">
+    <div
+      class="absolute inset-0 bg-cover bg-center bg-stone-300 dark:bg-stone-700"
+      style={image ? `background-image: url('${image}');` : ""}
+    />
+    {!image && (
+      <div class="absolute inset-0 flex items-center justify-center text-8xl">🌸</div>
+    )}
+    <div class="absolute inset-0 bg-gradient-to-t from-stone-900/70 via-stone-900/20 to-transparent" />
+
+    <!-- 品種資訊卡 -->
+    <div class="relative z-10 p-6 md:p-10 max-w-2xl">
+      <a href="/cherry" class="font-secondary text-xs text-stone-300 hover:text-white mb-4 inline-block transition" style="opacity:1">
+        ← 回到櫻花總覽
+      </a>
+      <h1 class="text-white mb-1" style="text-shadow: 0 2px 12px rgba(0,0,0,0.5);">{title}</h1>
+      {latinName && (
+        <p class="font-secondary italic text-stone-300 text-sm mb-3" style="opacity:1">{latinName}</p>
+      )}
+      <div class="flex flex-wrap gap-2">
+        {bloomSeason && (
+          <span class="bg-garden-amber/80 text-white text-xs font-secondary px-3 py-1 rounded-full backdrop-blur-sm">
+            🗓 {bloomSeason}
+          </span>
+        )}
+        {color && (
+          <span class="bg-rose-600/70 text-white text-xs font-secondary px-3 py-1 rounded-full backdrop-blur-sm">
+            🌸 {color}
+          </span>
+        )}
+        {mapPosition?.label && (
+          <span class="bg-black/40 text-white text-xs font-secondary px-3 py-1 rounded-full backdrop-blur-sm">
+            📍 {mapPosition.label}
+          </span>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- 內文區 -->
+  <section class="section container">
+    <div class="max-w-3xl mx-auto">
+      <!-- 文章內文 -->
+      <div class="glass rounded-2xl p-6 md:p-10 mb-6 prose prose-stone dark:prose-invert max-w-none intersect:animate-fadeUp opacity-0">
+        <Content />
+      </div>
+
+      <!-- 相簿 Gallery -->
+      {gallery && gallery.length > 0 && (
+        <div class="mb-6 intersect:animate-fadeUp opacity-0">
+          <h3 class="text-txt-p dark:text-darkmode-txt-p mb-4">品種照片集</h3>
+          <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {gallery.map((img, i) => (
+              <div class="aspect-square rounded-xl overflow-hidden bg-stone-200 dark:bg-stone-700">
+                <img
+                  src={img}
+                  alt={`${title} 照片 ${i + 1}
+                  <!-- 【此處的 alt 文字請在圖片放置後更換成有意義的描述】 -->`}
+                  class="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- 底部導覽 -->
+      <div class="flex gap-4 justify-between">
+        <a
+          href="/cherry"
+          class="glass rounded-xl px-5 py-3 font-secondary text-sm text-txt-p dark:text-darkmode-txt-p hover:text-garden-amber dark:hover:text-amber-300 transition intersect:animate-fadeLeft opacity-0"
+          style="opacity:0"
+        >
+          ← 所有品種
+        </a>
+        <a
+          href="/cherry/timeline"
+          class="glass rounded-xl px-5 py-3 font-secondary text-sm text-garden-amber dark:text-amber-300 hover:opacity-70 transition intersect:animate-fadeRight opacity-0"
+          style="opacity:0"
+        >
+          查看花期時序表 →
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
