@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@components/base/BaseLayout.astro";
+import { withBasePath } from "@lib/url";
 
 // ================================================================
 // 花期時序表資料
@@ -115,7 +116,7 @@ function toPercent(day: number): number {
                 <div class="flex items-center gap-3">
                   <!-- 品種名稱 -->
                   <a
-                    href={`/cherry/${id}`}
+                    href={withBasePath(`/cherry/${id}`)}
                     class="w-24 text-right font-secondary text-sm text-txt-s dark:text-darkmode-txt-s hover:text-garden-amber dark:hover:text-amber-300 transition shrink-0"
                     style="opacity:1"
                   >
@@ -182,7 +183,7 @@ function toPercent(day: number): number {
       ))}
 
       <div class="text-center mt-4">
-        <a href="/cherry" class="inline-block font-secondary text-sm text-garden-amber dark:text-amber-300 hover:opacity-70 transition intersect:animate-fadeUp opacity-0" style="opacity:0">
+        <a href={withBasePath("/cherry")} class="inline-block font-secondary text-sm text-garden-amber dark:text-amber-300 hover:opacity-70 transition intersect:animate-fadeUp opacity-0" style="opacity:0">
           ← 回到櫻花總覽
         </a>
       </div>

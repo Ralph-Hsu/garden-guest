@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@components/base/BaseLayout.astro";
 import { getCollection, render, type CollectionEntry } from "astro:content";
+import { withBasePath } from "@lib/url";
 
 export async function getStaticPaths() {
   const entries = await getCollection("lotus", ({ data }) => !data.draft);
@@ -26,7 +27,7 @@ const typeColor = type === "hardy" ? "bg-teal-700/80" : "bg-cyan-700/80";
   <section class="relative min-h-[55vh] flex items-end justify-start overflow-hidden -mt-4 mb-0">
     <div
       class="absolute inset-0 bg-cover bg-center bg-teal-900"
-      style={image ? `background-image: url('${image}');` : ""}
+      style={image ? `background-image: url('${withBasePath(image)}');` : ""}
     />
     {!image && (
       <div class="absolute inset-0 flex items-center justify-center text-8xl">🪷</div>
@@ -34,7 +35,7 @@ const typeColor = type === "hardy" ? "bg-teal-700/80" : "bg-cyan-700/80";
     <div class="absolute inset-0 bg-gradient-to-t from-stone-900/70 via-stone-900/20 to-transparent" />
 
     <div class="relative z-10 p-6 md:p-10 max-w-2xl">
-      <a href="/lotus" class="font-secondary text-xs text-stone-300 hover:text-white mb-4 inline-block transition" style="opacity:1">
+      <a href={withBasePath("/lotus")} class="font-secondary text-xs text-stone-300 hover:text-white mb-4 inline-block transition" style="opacity:1">
         ← 回到睡蓮總覽
       </a>
       <h1 class="text-white mb-1" style="text-shadow: 0 2px 12px rgba(0,0,0,0.5);">{title}</h1>
@@ -65,7 +66,7 @@ const typeColor = type === "hardy" ? "bg-teal-700/80" : "bg-cyan-700/80";
         <Content />
       </div>
       <div class="flex gap-4 justify-between mt-6">
-        <a href="/lotus" class="glass rounded-xl px-5 py-3 font-secondary text-sm text-txt-p dark:text-darkmode-txt-p hover:text-garden-amber dark:hover:text-amber-300 transition intersect:animate-fadeLeft opacity-0" style="opacity:0">
+        <a href={withBasePath("/lotus")} class="glass rounded-xl px-5 py-3 font-secondary text-sm text-txt-p dark:text-darkmode-txt-p hover:text-garden-amber dark:hover:text-amber-300 transition intersect:animate-fadeLeft opacity-0" style="opacity:0">
           ← 所有睡蓮品種
         </a>
       </div>

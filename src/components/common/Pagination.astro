@@ -1,5 +1,6 @@
 ---
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { withBasePath } from "@lib/url";
 
 type Props = {
   collection?: string;
@@ -48,7 +49,7 @@ if (pageIDs) {
         {/* previous */}
         {prevPage ? (
           <a
-            href={prevPage}
+            href={withBasePath(prevPage)}
             class="col rounded px-2 py-1.5 text-txt-p dark:text-darkmode-txt-p"
             aria-label="Previous"
           >
@@ -81,11 +82,11 @@ if (pageIDs) {
               </span>
             ) : (
               <a
-                href={
+               href={withBasePath(
                   pagination === 1
                     ? `${collection ? "/" + collection : "/"}`
                     : `${collection ? "/" + collection : ""}/page/${pagination}`
-                }
+               )}
                 aria-current="page"
                 class="col rounded px-4 py-2 font-semibold text-txt-p dark:text-darkmode-txt-p"
               >
@@ -98,7 +99,7 @@ if (pageIDs) {
         {/* next page */}
         {nextPage ? (
           <a
-            href={nextPage}
+            href={withBasePath(nextPage)}
             class="col rounded px-2 py-1.5 text-txt-p dark:text-darkmode-txt-p"
             aria-label="Next"
           >

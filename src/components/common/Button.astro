@@ -1,4 +1,6 @@
 ---
+import { withBasePath } from "@lib/url";
+
 interface Props {
   label: string;
   link?: string;
@@ -10,11 +12,12 @@ interface Props {
 }
 
 const { label, link, newtab=false, type="primary", color, hoverInvert=false, glass=true }: Props = Astro.props;
+const resolvedLink = link ? withBasePath(link) : undefined;
 ---
 
 { glass ? (
   <a 
-    href={link} 
+    href={resolvedLink} 
     target=`${newtab ? "_blank" : ""}`
     class=`no-underline inline-block hover:opacity-100 ${type == "primary" ? "" : "intersect:animate-fade opacity-0"}`
   >
@@ -26,7 +29,7 @@ const { label, link, newtab=false, type="primary", color, hoverInvert=false, gla
   </a>
 ) : (
   <a 
-    href={link} 
+    href={resolvedLink} 
     target=`${newtab ? "_blank" : ""}`
     class=`no-underline inline-block group intersect:animate-fadeLeft opacity-0 ${hoverInvert ? "hover:opacity-100" : ""}`
   >

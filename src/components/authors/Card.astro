@@ -3,6 +3,7 @@ import type { AuthorsEntry } from "@/types";
 import { plainify } from "@lib/textConverter";
 import { Image } from "astro:assets";
 import Social from "@components/common/Social.astro";
+import { withBasePath } from "@lib/url";
 
 interface Props {
   entry: AuthorsEntry;
@@ -30,7 +31,7 @@ const bodyBrief = entry.body ? plainify(entry.body?.slice(0, 100)) : null;
       )
     }
     <h4 class="mb-3">
-      <a href={`/authors/${entry.id}`}>{title}</a>
+      <a href={withBasePath(`/authors/${entry.id}`)}>{title}</a>
     </h4>
     {bodyBrief && <p class="mb-4">{bodyBrief}</p>}
     <Social links={social} />

@@ -1,8 +1,9 @@
 ---
 import ThemeSwitcher from "@components/base/ThemeSwitcher.astro";
 import { IoSearch } from "react-icons/io5";
+import { stripBasePath, withBasePath } from "@lib/url";
 
-const { pathname } = Astro.url;
+const currentPath = stripBasePath(Astro.url.pathname);
 const activeLinkClasses = "text-garden-amber dark:text-amber-300 border-b-2 border-garden-amber dark:border-amber-300";
 const inactiveLinkClasses = "hover:text-garden-amber dark:hover:text-amber-300";
 
@@ -54,6 +55,9 @@ const menu = [
     url: "/news",
   },
 ];
+
+const logoUrl = withBasePath("/");
+const searchUrl = withBasePath("/search");
 ---
 
 <header
@@ -63,7 +67,7 @@ const menu = [
   <nav class="relative flex flex-wrap items-center justify-between">
     <!-- Logo -->
     <a
-      href="/"
+      href={logoUrl}
       class="order-0 font-primary text-xl font-bold text-garden-amber dark:text-amber-300 no-underline mr-4 shrink-0"
       style="opacity:1 !important;"
     >
@@ -96,11 +100,11 @@ const menu = [
         menu.map((item) => (
           <li>
             <a
-              href={item.url}
+              href={withBasePath(item.url)}
               data-nav-link
               data-nav-url={item.url}
               class={`block px-2 py-2 font-secondary font-semibold text-sm text-txt-p transition dark:text-darkmode-txt-p lg:px-2 lg:py-3 ${
-                isMenuActive(pathname, item.url)
+                isMenuActive(currentPath, item.url)
                   ? activeLinkClasses
                   : inactiveLinkClasses
               }`}
@@ -114,7 +118,7 @@ const menu = [
     <div class="order-1 ml-auto flex items-center md:order-2 lg:ml-0">
       <a
         class="mr-3 inline-block text-xl text-txt-p dark:text-darkmode-txt-p hover:text-garden-amber dark:hover:text-amber-300 transition"
-        href="/search"
+        href={searchUrl}
         aria-label="搜尋"
         style="opacity:1 !important;"
       >
@@ -143,6 +147,14 @@ const menu = [
     return path.endsWith("/") ? path.slice(0, -1) : path;
   };
 
+  const stripBasePath = (path) => {
+    const baseUrl = import.meta.env.BASE_URL || "/";
+    const basePrefix = baseUrl === "/" ? "" : baseUrl.replace(/\/$/, "");
+    if (!basePrefix) return path;
+    if (path === basePrefix) return "/";
+    return path.startsWith(`${basePrefix}/`) ? path.slice(basePrefix.length) : path;
+  };
+
   const isMenuActive = (currentPath, itemUrl) => {
     const normalizedCurrentPath = normalizePath(currentPath);
     const normalizedItemUrl = normalizePath(itemUrl);
@@ -155,7 +167,7 @@ const menu = [
   };
 
   const updateActiveMenuItem = () => {
-    const currentPath = window.location.pathname;
+    const currentPath = stripBasePath(window.location.pathname);
     const links = document.querySelectorAll("[data-nav-link]");
 
     links.forEach((link) => {

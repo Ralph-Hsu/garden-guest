@@ -13,12 +13,14 @@
  * 3. 每個步驟的 scale/x/y 決定地圖縮放到該品種位置時的視角
  */
 import type { CherryEntry } from "@/types";
+import { withBasePath } from "@lib/url";
 
 interface Props {
   entries: CherryEntry[];
 }
 
 const { entries } = Astro.props;
+const mapImageUrl = withBasePath("/images/cherry/garden-map.jpg");
 
 // ================================================================
 // 地圖步驟設定
@@ -134,7 +136,7 @@ const entryMap = Object.fromEntries(entries.map((e) => [e.id, e]));
       <div
         id="cherry-map-image"
         class="w-full h-full bg-stone-200 dark:bg-stone-700 bg-cover bg-center transition-transform duration-700 ease-out"
-        style="background-image: url('/images/cherry/garden-map.jpg');"
+        style={`background-image: url('${mapImageUrl}');`}
       >
         <!-- 未放置地圖圖片時的備援畫面 -->
         <div id="cherry-map-placeholder" class="w-full h-full flex flex-col items-center justify-center text-stone-400 dark:text-stone-500">
@@ -150,7 +152,7 @@ const entryMap = Object.fromEntries(entries.map((e) => [e.id, e]));
       <div id="cherry-map-markers" class="absolute inset-0 pointer-events-none">
         {entries.filter(e => e.data.mapPosition).map((entry) => (
           <a
-            href={`/cherry/${entry.id}`}
+            href={withBasePath(`/cherry/${entry.id}`)}
             data-marker={entry.id}
             class="cherry-marker absolute pointer-events-auto opacity-0 transition-all duration-500"
             style={`left: ${entry.data.mapPosition!.x}%; top: ${entry.data.mapPosition!.y}%; transform: translate(-50%, -50%);`}

@@ -4,6 +4,7 @@ import Share from "@components/common/Share.astro";
 import { Image } from "astro:assets";
 import BaseLayout from "@components/base/BaseLayout.astro";
 import { upperHumanize, markdownify, slugify } from "@lib/textConverter";
+import { withBasePath } from "@lib/url";
 
 import {
   FaRegClock,
@@ -63,7 +64,7 @@ const {
               {
                 author && (
                   <div class="m-4">
-                    <a href={`/authors/${slugify(author.id)}`}>
+                    <a href={withBasePath(`/authors/${slugify(author.id)}`)}>
                       <FaRegUserCircle className={"mr-2 -mt-1 inline-block"} />
                       {upperHumanize(author.id)}
                     </a>

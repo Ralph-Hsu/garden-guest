@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@components/base/BaseLayout.astro";
+import { withBasePath } from "@lib/url";
 ---
 
 <BaseLayout title="櫻花族譜" description="中台庭園七大櫻花品種的親緣關係圖譜。">
@@ -29,7 +30,7 @@ import BaseLayout from "@components/base/BaseLayout.astro";
              建議尺寸：1200×800px 或以上 -->
         <div class="w-full rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800">
           <img
-            src="/images/cherry/family-tree.jpg"
+            src={withBasePath("/images/cherry/family-tree.jpg")}
             alt="中台庭園櫻花族譜"
             class="w-full h-auto object-contain"
             loading="lazy"
@@ -47,7 +48,7 @@ import BaseLayout from "@components/base/BaseLayout.astro";
         </p>
       </div>
 
-      <a href="/cherry" class="inline-block font-secondary text-sm text-garden-amber dark:text-amber-300 hover:opacity-70 transition intersect:animate-fadeUp opacity-0" style="opacity:0">
+      <a href={withBasePath("/cherry")} class="inline-block font-secondary text-sm text-garden-amber dark:text-amber-300 hover:opacity-70 transition intersect:animate-fadeUp opacity-0" style="opacity:0">
         ← 回到櫻花總覽
       </a>
     </div>

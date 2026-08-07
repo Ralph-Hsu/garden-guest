@@ -1,6 +1,7 @@
 ---
 import { Image } from "astro:assets";
 import type { RecipesEntry } from "@/types";
+import { withBasePath } from "@lib/url";
 
 interface Props {
   entry: RecipesEntry;
@@ -14,7 +15,7 @@ const { title, image, imageAlt } = entry.data;
   class="h-full m-2 pl-0 bg-gradient-to-br gradient rounded-lg intersect:animate-fadeUp opacity-0"
 >
   <div class="glass h-full rounded-lg">
-    <a class="group hover:opacity-100" href={`/recipes/${entry.id}`}>
+    <a class="group hover:opacity-100" href={withBasePath(`/recipes/${entry.id}`)}>
       <div class="relative rounded-lg pb-9/16 overflow-hidden">
         {
           image && (

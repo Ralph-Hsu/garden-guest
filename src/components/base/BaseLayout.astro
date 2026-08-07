@@ -7,6 +7,7 @@ import "@/styles/main.scss";
 import { ClientRouter } from "astro:transitions";
 import Background from "@/components/base/Background.astro";
 import { Tooltips } from "astro-tooltips";
+import { withBasePath } from "@lib/url";
 
 // types for frontmatters
 export interface Props {
@@ -33,12 +34,18 @@ const siteTitle = "中台庭園";
 const siteDescription = "探索自然的四季之美——中台庭園官方網站";
 const siteImage = "/images/og-image.jpg";
 const siteAuthor = "中台庭園";
-const baseUrl = "https://garden-guest.pages.dev";
+const siteOrigin = Astro.site?.origin ?? Astro.url.origin;
+const pageUrl = canonical ?? Astro.url.href;
+const socialImageUrl = new URL(withBasePath(image ? image : siteImage), siteOrigin).toString();
+const backgroundLightImage = withBasePath(
+  backgroundImage ? backgroundImage : "/images/backgrounds/garden-day.jpg",
+);
+const backgroundDarkImage = withBasePath(
+  backgroundImageDark ?? backgroundImage ?? "/images/backgrounds/garden-night.jpg",
+);
 const htmlBackgroundStyle = [
-  backgroundImage ? `--page-bg-light: url('${backgroundImage}')` : "",
-  (backgroundImageDark ?? backgroundImage)
-    ? `--page-bg-dark: url('${backgroundImageDark ?? backgroundImage}')`
-    : ""
+  `--page-bg-light: url('${backgroundLightImage}')`,
+  `--page-bg-dark: url('${backgroundDarkImage}')`,
 ]
   .filter(Boolean)
   .join("; ");
@@ -51,22 +58,22 @@ const htmlBackgroundStyle = [
     <link
       rel="apple-touch-icon"
       sizes="180x180"
-      href="/favicon/apple-touch-icon.png"
+      href={withBasePath("/favicon/apple-touch-icon.png")}
     />
     <link
       rel="icon"
       type="image/png"
       sizes="32x32"
-      href="/favicon/favicon-32x32.png"
+      href={withBasePath("/favicon/favicon-32x32.png")}
     />
     <link
       rel="icon"
       type="image/png"
       sizes="16x16"
-      href="/favicon/favicon-16x16.png"
+      href={withBasePath("/favicon/favicon-16x16.png")}
     />
     
-    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="sitemap" href={withBasePath("/sitemap-index.xml")} />
 
     <meta name="theme-name" content="中台庭園" />
     <meta name="msapplication-TileColor" content="#292524" />
@@ -106,24 +113,15 @@ const htmlBackgroundStyle = [
       content={plainify(description ? description : siteDescription)}
     />
     <meta property="og:type" content="website" />
-    <meta
-      property="og:url"
-      content={`${baseUrl}/${Astro.url.pathname.replace("/", "")}`}
-    />
-    <meta
-      property="og:image"
-      content={`${baseUrl}${image ? image : siteImage}`}
-    />
+    <meta property="og:url" content={pageUrl} />
+    <meta property="og:image" content={socialImageUrl} />
 
     <meta name="twitter:title" content={plainify(title ? title : siteTitle)} />
     <meta
       name="twitter:description"
       content={plainify(description ? description : siteDescription)}
     />
-    <meta
-      name="twitter:image"
-      content={`${baseUrl}${image ? image : siteImage}`}
-    />
+    <meta name="twitter:image" content={socialImageUrl} />
     <meta name="twitter:card" content="summary_large_image" />
 
     <!-- Google Fonts：Chiron GoRound TC 標題字體 + Open Sans 內文字體 -->

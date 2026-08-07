@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "@components/base/BaseLayout.astro";
 import { getCollection } from "astro:content";
+import { withBasePath } from "@lib/url";
 
 const POSTS_PER_PAGE = 9;
 
@@ -47,12 +48,12 @@ const allCategories = [...new Set(allPosts.flatMap((p) => p.data.categories ?? [
   <section class="section container">
     {allCategories.length > 0 && (
       <div class="flex flex-wrap gap-2 justify-center mb-8 intersect:animate-fadeDown opacity-0">
-        <a href="/news" class="font-secondary text-sm px-4 py-1.5 rounded-full glass text-txt-p dark:text-darkmode-txt-p hover:text-garden-amber dark:hover:text-amber-300 transition">
+        <a href={withBasePath("/news")} class="font-secondary text-sm px-4 py-1.5 rounded-full glass text-txt-p dark:text-darkmode-txt-p hover:text-garden-amber dark:hover:text-amber-300 transition">
           全部
         </a>
         {allCategories.map((cat) => (
           <a
-            href={`/news?category=${encodeURIComponent(cat)}`}
+            href={withBasePath(`/news?category=${encodeURIComponent(cat)}`)}
             class="font-secondary text-sm px-4 py-1.5 rounded-full glass text-txt-p dark:text-darkmode-txt-p hover:text-garden-amber dark:hover:text-amber-300 transition"
             style="opacity:1"
           >
@@ -65,12 +66,12 @@ const allCategories = [...new Set(allPosts.flatMap((p) => p.data.categories ?? [
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
       {posts.map((post) => (
         <a
-          href={`/news/${post.id}`}
+          href={withBasePath(`/news/${post.id}`)}
           class="group glass rounded-2xl overflow-hidden hover:-translate-y-1 transition-all duration-300 intersect:animate-fadeUp opacity-0"
         >
           <div
             class="relative w-full h-48 bg-stone-200 dark:bg-stone-700 bg-cover bg-center overflow-hidden"
-            style={post.data.image ? `background-image: url('${post.data.image}');` : ""}
+            style={post.data.image ? `background-image: url('${withBasePath(post.data.image)}');` : ""}
           >
             {!post.data.image && <div class="absolute inset-0 flex items-center justify-center text-4xl">🌸</div>}
             {post.data.categories && post.data.categories[0] && (
@@ -115,7 +116,7 @@ const allCategories = [...new Set(allPosts.flatMap((p) => p.data.categories ?? [
       <div class="flex justify-center gap-2 mt-10 intersect:animate-fadeUp opacity-0">
         {Array.from({ length: pageCount }, (_, i) => (
           <a
-            href={i === 0 ? "/news" : `/news/page/${i + 1}`}
+            href={withBasePath(i === 0 ? "/news" : `/news/page/${i + 1}`)}
             class={`font-secondary text-sm w-9 h-9 flex items-center justify-center rounded-full transition ${
               i + 1 === currentPageIndex
                 ? "bg-garden-amber text-white"

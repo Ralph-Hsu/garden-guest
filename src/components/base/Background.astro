@@ -25,7 +25,7 @@
   /* 亮色模式背景（庭園白天照）
      【請將照片放置於 /public/images/backgrounds/garden-day.jpg】 */
   html::before {
-    background-image: var(--page-bg-light, url(/images/backgrounds/garden-day.jpg));
+    background-image: var(--page-bg-light);
     /* 尚未放置圖片時，顯示暖米色漸層作為備援 */
     background-color: #f5f0ea;
     opacity: 1;
@@ -38,7 +38,7 @@
   /* 暗色模式背景（庭園夜景照）
      【請將照片放置於 /public/images/backgrounds/garden-night.jpg】 */
   html::after {
-    background-image: var(--page-bg-dark, url(/images/backgrounds/garden-night.jpg));
+    background-image: var(--page-bg-dark);
     /* 尚未放置圖片時，顯示深石褐漸層作為備援 */
     background-color: #1c1917;
     opacity: 0;

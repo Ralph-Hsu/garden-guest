@@ -4,6 +4,7 @@
  * 用於 /cherry 首頁的品種列表區塊
  */
 import type { CherryEntry } from "@/types";
+import { withBasePath } from "@lib/url";
 
 interface Props {
   entry: CherryEntry;
@@ -14,13 +15,13 @@ const { title, latinName, bloomSeason, color, image, mapPosition } = entry.data;
 ---
 
 <a
-  href={`/cherry/${entry.id}`}
+  href={withBasePath(`/cherry/${entry.id}`)}
   class="group glass rounded-2xl overflow-hidden hover:-translate-y-1 transition-all duration-300 intersect:animate-fadeUp opacity-0 block"
 >
   <!-- 封面圖 -->
   <div
     class="relative w-full h-48 bg-rose-100 dark:bg-stone-700 bg-cover bg-center overflow-hidden"
-    style={image ? `background-image: url('${image}');` : ""}
+    style={image ? `background-image: url('${withBasePath(image)}');` : ""}
   >
     {!image && (
       <div class="absolute inset-0 flex items-center justify-center text-5xl">

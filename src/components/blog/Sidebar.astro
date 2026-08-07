@@ -3,6 +3,7 @@ import { lowerHumanize, upperHumanize } from "@lib/textConverter";
 import { FaRegFolder, FaHashtag } from "react-icons/fa";
 import Button from "@components/common/Button.astro";
 import { ScrollArea } from "@components/common/shortcodes/ScrollArea";
+import { withBasePath } from "@lib/url";
 
 interface Props {
   tags: string[];
@@ -18,7 +19,7 @@ const { tags, categories, allCategories }: Props = Astro.props;
   <div class="glass rounded-lg p-4 m-2 mb-4 intersect:animate-fadeLeft opacity-0">
     <div>
       <h4 class="mb-2">
-        <a href="/blog/categories">
+      <a href={withBasePath("/blog/categories")}>
           <FaRegFolder className={"mr-1 -mt-1.5 inline-block"} />
            Categories
         </a>
@@ -32,7 +33,7 @@ const { tags, categories, allCategories }: Props = Astro.props;
               <li>
                 <a
                   class=""
-                  href={`/blog/categories/${category}`}
+                  href={withBasePath(`/blog/categories/${category}`)}
                 >
                   {upperHumanize(category)}{" "}
                   <div class="inline-block pl-1">({count})</div>
@@ -48,7 +49,7 @@ const { tags, categories, allCategories }: Props = Astro.props;
   <div class="glass rounded-lg p-4 m-2 intersect:animate-fadeLeft opacity-0">
     <div>
       <h4 class="mb-2">
-        <a href="/blog/tags">
+      <a href={withBasePath("/blog/tags")}>
           <FaHashtag className={"mr-1 -mt-1.5 inline-block"} />
            Tags
         </a>
