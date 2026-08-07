@@ -71,7 +71,7 @@ const themes = [
           遇見，<br class="sm:hidden" />自然的四季之美
         </h1>
         <!-- 副標 -->
-        <p class="font-secondary text-stone-200 dark:text-stone-300 text-base md:text-lg mb-8 leading-relaxed intersect:animate-fade opacity-0">
+        <p class="font-secondary text-stone-200 dark:text-stone-300 text-base md:text-lg mb-8 leading-relaxed intersect:animate-fade opacity-0" style="text-shadow: 0 2px 12px rgba(0,0,0,0.4);">
           <!-- 【此處請更換成庭園的宣傳標語】 -->
           讓花草帶你感受每一季的溫柔，探索自然生命的無窮變化。
         </p>
@@ -106,7 +106,7 @@ const themes = [
        ============================================================ -->
   <section class="section container">
     <div class="text-center mb-10 intersect:animate-fadeUp opacity-0">
-      <h2 class="text-txt-p dark:text-darkmode-txt-p mb-2">花藏世界</h2>
+      <h2 class="text-txt-p dark:text-darkmode-txt-p mb-2" style="text-shadow: 0 1px 8px rgba(255, 255, 255, 0.6);">花藏世界</h2>
       <p class="font-secondary text-txt-light dark:text-darkmode-txt-light">
         探索中台庭園豐富的植物世界
       </p>
@@ -125,7 +125,7 @@ const themes = [
               style={`background-image: url('${theme.image}');`}
             />
             <!-- 漸層遮罩 -->
-            <div class={`absolute inset-0 bg-gradient-to-t ${theme.color}`} />
+            <div class={`absolute inset-0 bg-gradient-to-t ${theme.color} transition-opacity duration-300 group-hover:opacity-0`} />
             <!-- 內容 -->
             <div class="absolute bottom-0 left-0 right-0 p-5 text-white">
               <div class="text-3xl mb-2">{theme.icon}</div>
@@ -147,7 +147,7 @@ const themes = [
   <section class="section container">
     <div class="flex items-center justify-between mb-8">
       <div class="intersect:animate-fadeRight opacity-0">
-        <h2 class="text-txt-p dark:text-darkmode-txt-p mb-1">最新花況</h2>
+        <h2 class="text-txt-p dark:text-darkmode-txt-p mb-1" style="text-shadow: 0 1px 8px rgba(255, 255, 255, 0.6);">最新花況</h2>
         <p class="font-secondary text-txt-light dark:text-darkmode-txt-light text-sm">
           Garden Updates
         </p>
@@ -214,7 +214,7 @@ const themes = [
        ============================================================ -->
   <section class="section container">
     <div class="text-center mb-8 intersect:animate-fadeUp opacity-0">
-      <h2 class="text-txt-p dark:text-darkmode-txt-p mb-2">園區資訊</h2>
+      <h2 class="text-txt-p dark:text-darkmode-txt-p mb-2" style="text-shadow: 0 1px 8px rgba(255, 255, 255, 0.6);">園區資訊</h2>
       <p class="font-secondary text-txt-light dark:text-darkmode-txt-light text-sm">
         Visit Information
       </p>
@@ -258,4 +258,3 @@ const themes = [
     </div>
   </section>
 </BaseLayout>
-
