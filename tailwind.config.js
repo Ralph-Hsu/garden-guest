@@ -10,9 +10,9 @@ let h3 = h4 * font_scale;
 let h2 = h3 * font_scale;
 let h1 = h2 * font_scale;
 
-// 大標題：知芒行（中文行書，Google Fonts）
-let fontPrimary = "Zhi Mang Xing";
-let fontPrimaryType = "cursive";
+// 大標題：Chiron GoRound TC（Google Fonts）
+let fontPrimary = "Chiron GoRound TC";
+let fontPrimaryType = "sans-serif";
 // 內文：Open Sans
 let fontSecondary = "Open Sans";
 let fontSecondaryType = "sans-serif";
