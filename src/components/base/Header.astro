@@ -3,6 +3,24 @@ import ThemeSwitcher from "@components/base/ThemeSwitcher.astro";
 import { IoSearch } from "react-icons/io5";
 
 const { pathname } = Astro.url;
+const activeLinkClasses = "text-garden-amber dark:text-amber-300 border-b-2 border-garden-amber dark:border-amber-300";
+const inactiveLinkClasses = "hover:text-garden-amber dark:hover:text-amber-300";
+
+const normalizePath = (path: string) => {
+  if (path === "/") return "/";
+  return path.endsWith("/") ? path.slice(0, -1) : path;
+};
+
+const isMenuActive = (currentPath: string, itemUrl: string) => {
+  const normalizedCurrentPath = normalizePath(currentPath);
+  const normalizedItemUrl = normalizePath(itemUrl);
+
+  if (normalizedItemUrl === "/") return normalizedCurrentPath === "/";
+  return (
+    normalizedCurrentPath === normalizedItemUrl ||
+    normalizedCurrentPath.startsWith(`${normalizedItemUrl}/`)
+  );
+};
 
 const stickyHeader = true;
 
@@ -79,10 +97,12 @@ const menu = [
           <li>
             <a
               href={item.url}
+              data-nav-link
+              data-nav-url={item.url}
               class={`block px-2 py-2 font-secondary font-semibold text-sm text-txt-p transition dark:text-darkmode-txt-p lg:px-2 lg:py-3 ${
-                (pathname === `${item.url}/` || pathname === item.url)
-                  ? "text-garden-amber dark:text-amber-300 border-b-2 border-garden-amber dark:border-amber-300"
-                  : "hover:text-garden-amber dark:hover:text-amber-300"
+                isMenuActive(pathname, item.url)
+                  ? activeLinkClasses
+                  : inactiveLinkClasses
               }`}
             >
               {item.name}
@@ -104,3 +124,49 @@ const menu = [
     </div>
   </nav>
 </header>
+
+<script>
+  const activeLinkClasses = [
+    "text-garden-amber",
+    "dark:text-amber-300",
+    "border-b-2",
+    "border-garden-amber",
+    "dark:border-amber-300",
+  ];
+  const inactiveLinkClasses = [
+    "hover:text-garden-amber",
+    "dark:hover:text-amber-300",
+  ];
+
+  const normalizePath = (path) => {
+    if (path === "/") return "/";
+    return path.endsWith("/") ? path.slice(0, -1) : path;
+  };
+
+  const isMenuActive = (currentPath, itemUrl) => {
+    const normalizedCurrentPath = normalizePath(currentPath);
+    const normalizedItemUrl = normalizePath(itemUrl);
+
+    if (normalizedItemUrl === "/") return normalizedCurrentPath === "/";
+    return (
+      normalizedCurrentPath === normalizedItemUrl ||
+      normalizedCurrentPath.startsWith(`${normalizedItemUrl}/`)
+    );
+  };
+
+  const updateActiveMenuItem = () => {
+    const currentPath = window.location.pathname;
+    const links = document.querySelectorAll("[data-nav-link]");
+
+    links.forEach((link) => {
+      const itemUrl = link.dataset.navUrl || "/";
+      const isActive = isMenuActive(currentPath, itemUrl);
+
+      link.classList.remove(...activeLinkClasses, ...inactiveLinkClasses);
+      link.classList.add(...(isActive ? activeLinkClasses : inactiveLinkClasses));
+    });
+  };
+
+  updateActiveMenuItem();
+  document.addEventListener("astro:page-load", updateActiveMenuItem);
+</script>
