@@ -228,9 +228,7 @@ const themes = [
         <h4 class="text-garden-amber dark:text-amber-300 mb-2" style="opacity:1">開放時間</h4>
         <p class="font-secondary text-sm text-txt-s dark:text-darkmode-txt-s leading-relaxed" style="opacity:1">
           <!-- 【此處請更換成實際開放時間】 -->
-          週二至週日<br />
-          上午 08:30 ─ 下午 17:30<br />
-          <span class="text-rose-500 dark:text-rose-400">（週一公休）</span>
+          每日<br />上午 8：00 <br />至<br />下午 5：00
         </p>
       </div>
 
@@ -238,11 +236,24 @@ const themes = [
       <div class="glass rounded-2xl p-6 text-center intersect:animate-fadeUp opacity-0">
         <div class="text-3xl mb-3">📍</div>
         <h4 class="text-garden-amber dark:text-amber-300 mb-2" style="opacity:1">交通資訊</h4>
-        <p class="font-secondary text-sm text-txt-s dark:text-darkmode-txt-s leading-relaxed" style="opacity:1">
-          <!-- 【此處請更換成實際地址與交通說明】 -->
-          此處請填入庭園地址<br />
-          此處請填入附近大眾運輸資訊
-        </p>
+        <div class="flex flex-col gap-2 mt-3">
+          <a
+            href="https://maps.app.goo.gl/V9YfTagXAdSuAF3b6"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-secondary text-sm inline-block px-4 py-2 rounded-full bg-garden-amber text-white hover:opacity-90 transition-opacity"
+          >
+            使用 Google Map
+          </a>
+          <a
+            href="https://www.ctworld.org.tw/landscape/maptraffic_2023.htm"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="font-secondary text-sm inline-block px-4 py-2 rounded-full border border-garden-amber text-garden-amber dark:text-amber-300 dark:border-amber-300 hover:opacity-90 transition-opacity"
+          >
+            點我了解更多
+          </a>
+        </div>
       </div>
 
       <!-- 聯絡方式 -->
