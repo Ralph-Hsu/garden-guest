@@ -10,8 +10,8 @@ import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
-  site: "https://janedoe.com",
-  base: "/",
+  site: "https://Ralph-Hsu.github.io",
+  base: "/garden-guest",
   trailingSlash: "ignore",
   prefetch: {
     prefetchAll: true
