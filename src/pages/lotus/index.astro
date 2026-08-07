@@ -10,16 +10,14 @@ const hardyEntries = allEntries.filter(e => e.data.type === "hardy");
 const tropicalEntries = allEntries.filter(e => e.data.type === "tropical");
 ---
 
-<BaseLayout title="睡蓮" description="中台庭園豐富的睡蓮世界，寒帶與熱帶品種共逾百種。">
+<BaseLayout
+  title="睡蓮"
+  description="中台庭園豐富的睡蓮世界，寒帶與熱帶品種共逾百種。"
+  backgroundImage="/images/lotus/hero.jpg"
+>
 
   <!-- Hero -->
   <section class="relative min-h-[50vh] flex items-center justify-center overflow-hidden -mt-4 mb-0">
-    <div
-      class="absolute inset-0 bg-cover bg-center bg-teal-900"
-      style="background-image: url('/images/lotus/hero.jpg');"
-    />
-    <!-- 【請將睡蓮大圖放置於 /public/images/lotus/hero.jpg】 -->
-    <div class="absolute inset-0 bg-gradient-to-b from-teal-900/40 to-stone-900/60" />
     <div class="relative z-10 text-center px-4">
       <div class="glass rounded-3xl px-10 py-8 inline-block intersect:animate-scale opacity-0">
         <p class="font-secondary text-sm tracking-[0.3em] text-teal-200 uppercase mb-2">Water Lilies</p>

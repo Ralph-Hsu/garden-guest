@@ -13,21 +13,39 @@ export interface Props {
   title?: string;
   description?: string | null;
   image?: string;
+  backgroundImage?: string;
+  backgroundImageDark?: string;
   noindex?: boolean;
   canonical?: string;
 }
 
-const { title, description, image, noindex, canonical } = Astro.props;
+const {
+  title,
+  description,
+  image,
+  backgroundImage,
+  backgroundImageDark,
+  noindex,
+  canonical
+} = Astro.props;
 
 const siteTitle = "中台庭園";
 const siteDescription = "探索自然的四季之美——中台庭園官方網站";
 const siteImage = "/images/og-image.jpg";
 const siteAuthor = "中台庭園";
 const baseUrl = "https://garden-guest.pages.dev";
+const htmlBackgroundStyle = [
+  backgroundImage ? `--page-bg-light: url('${backgroundImage}')` : "",
+  (backgroundImageDark ?? backgroundImage)
+    ? `--page-bg-dark: url('${backgroundImageDark ?? backgroundImage}')`
+    : ""
+]
+  .filter(Boolean)
+  .join("; ");
 ---
 
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh-TW" style={htmlBackgroundStyle || undefined}>
   <head>
     <!-- favicon -->
     <link

@@ -8,16 +8,14 @@ const entries = (await getCollection("flora", ({ data }) => !data.draft))
 const plantTypes = ["草本", "藤本", "小灌木"] as const;
 ---
 
-<BaseLayout title="花草" description="中台庭園近百種草本、藤本與小灌木花草，芬芳四溢。">
+<BaseLayout
+  title="花草"
+  description="中台庭園近百種草本、藤本與小灌木花草，芬芳四溢。"
+  backgroundImage="/images/flora/hero.jpg"
+>
 
   <!-- Hero -->
   <section class="relative min-h-[50vh] flex items-center justify-center overflow-hidden -mt-4 mb-0">
-    <div
-      class="absolute inset-0 bg-cover bg-center bg-amber-900"
-      style="background-image: url('/images/flora/hero.jpg');"
-    />
-    <!-- 【請將花草大圖放置於 /public/images/flora/hero.jpg】 -->
-    <div class="absolute inset-0 bg-gradient-to-b from-amber-900/40 to-stone-900/60" />
     <div class="relative z-10 text-center px-4">
       <div class="glass rounded-3xl px-10 py-8 inline-block intersect:animate-scale opacity-0">
         <p class="font-secondary text-sm tracking-[0.3em] text-amber-200 uppercase mb-2">Garden Flora</p>
