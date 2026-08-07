@@ -6,17 +6,16 @@ import AutoImport from "astro-auto-import";
 import { defineConfig } from "astro/config";
 import remarkCollapse from "remark-collapse";
 import remarkToc from "remark-toc";
-import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
   site: "https://Ralph-Hsu.github.io",
   base: "/garden-guest",
+  output: "static",
   trailingSlash: "ignore",
   prefetch: {
     prefetchAll: true
   },
-  adapter: cloudflare(),
   integrations: [react(), sitemap(), tailwind({
     config: {
       applyBaseStyles: false
