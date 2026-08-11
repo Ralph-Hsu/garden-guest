@@ -13,17 +13,17 @@ const BLOOM_DATA: Record<string, {
   color: string;
   years: Record<number, { start: number; end: number; peak: number }>;
 }> = {
-  kawazu:        { variety: "河津櫻",   color: "#f472b6", years: { 2015: { start: 20, end: 45, peak: 32 }, 2016: { start: 18, end: 42, peak: 30 } } },
-  formosana:     { variety: "福爾摩沙", color: "#ef4444", years: { 2015: { start: 25, end: 50, peak: 37 }, 2016: { start: 23, end: 48, peak: 35 } } },
-  tsubakikanzan: { variety: "椿寒櫻",   color: "#e11d48", years: { 2015: { start: 15, end: 38, peak: 26 }, 2016: { start: 14, end: 36, peak: 24 } } },
-  fuji:          { variety: "富士櫻",   color: "#fbcfe8", years: { 2015: { start: 55, end: 78, peak: 66 }, 2016: { start: 52, end: 75, peak: 63 } } },
-  shidare:       { variety: "枝垂櫻",   color: "#f9a8d4", years: { 2015: { start: 50, end: 75, peak: 62 }, 2016: { start: 48, end: 72, peak: 60 } } },
-  yae:           { variety: "八重櫻",   color: "#db2777", years: { 2015: { start: 72, end: 100, peak: 86 }, 2016: { start: 70, end: 98, peak: 84 } } },
-  sumizome:      { variety: "墨染櫻",   color: "#fce7f3", years: { 2016: { start: 62, end: 82, peak: 72 } } },
+  formosana:     { variety: "福爾摩沙", color: "#ef4444", years: { 2025: { start: 25, end: 50, peak: 37 }, 2026: { start: 1, end: 55, peak: 35 } } },
+  kawazu:        { variety: "河津櫻",   color: "#f472b6", years: { 2025: { start: 20, end: 45, peak: 32 }, 2026: { start: 30, end: 60, peak: 45 } } },
+  shidare:       { variety: "枝垂櫻",   color: "#f9a8d4", years: { 2025: { start: 50, end: 75, peak: 62 }, 2026: { start: 45, end: 80, peak: 60 } } },
+  yae:           { variety: "八重櫻",   color: "#db2777", years: { 2025: { start: 72, end: 100, peak: 86 }, 2026: { start: 45, end: 90, peak: 65 } } },
+  tsubakikanzan: { variety: "椿寒櫻",   color: "#e11d48", years: { 2025: { start: 15, end: 38, peak: 26 }, 2026: { start: 60, end: 100, peak: 80 } } },
+  fuji:          { variety: "富士櫻",   color: "#f9a8d4", years: { 2025: { start: 55, end: 78, peak: 66 }, 2026: { start: 100, end: 120, peak: 110 } } },
+  sumizome:      { variety: "墨染櫻",   color: "#ef4444", years: { 2025: { start: 62, end: 82, peak: 72 } } },
   // 【請依照實際資料更新以上數值，startDay/endDay 為一年中第幾天】
 };
 
-const YEARS = [2015, 2016];
+const YEARS = [2025, 2026];
 
 // 顯示的日期範圍（一年的第幾天）
 const DISPLAY_START = 1;    // 1月1日
@@ -37,11 +37,11 @@ function getDayLabel(day: number): string {
 
 // 月份刻度
 const MONTH_MARKS = [
-  { day: 1,  label: "1月" },
-  { day: 32, label: "2月" },
-  { day: 60, label: "3月" },
-  { day: 91, label: "4月" },
-  { day: 121, label: "5月" },
+  { day: 1,  label: "12月" },
+  { day: 32, label: "1月" },
+  { day: 60, label: "2月" },
+  { day: 91, label: "3月" },
+  { day: 120, label: "4月" },
 ].filter(m => m.day >= DISPLAY_START && m.day <= DISPLAY_END);
 
 const TOTAL_DAYS = DISPLAY_END - DISPLAY_START;
