@@ -37,6 +37,24 @@ const MAP_STEPS = [
     entryId: null,
   },
   {
+    id: "yae",
+    label: "八重櫻區",
+    description: "層疊繁複，春末壓軸貴族",
+    scale: 1.8,
+    x: -5,    // 【請依照地圖調整此數值】
+    y: 22,    // 【請依照地圖調整此數值】
+    entryId: "yae",
+  },
+  {
+    id: "shidare",
+    label: "枝垂櫻區",
+    description: "瀑布般垂落的粉紅花簾",
+    scale: 1.8,
+    x: 22,    // 【請依照地圖調整此數值】
+    y: -10,    // 【請依照地圖調整此數值】
+    entryId: "shidare",
+  },
+  {
     id: "kawazu",
     label: "河津櫻區",
     description: "一月下旬率先盛開，迎接春天的使者",
@@ -55,51 +73,6 @@ const MAP_STEPS = [
     entryId: "formosana",
   },
   {
-    id: "tsubakikanzan",
-    label: "椿寒櫻區",
-    description: "寒冬中的玫瑰紅燃放",
-    scale: 1.8,
-    x: 18,    // 【請依照地圖調整此數值】
-    y: 8,     // 【請依照地圖調整此數值】
-    entryId: "tsubakikanzan",
-  },
-  {
-    id: "fuji",
-    label: "富士櫻區",
-    description: "淡粉白花朵，如雪般輕盈",
-    scale: 1.8,
-    x: -8,    // 【請依照地圖調整此數值】
-    y: 18,    // 【請依照地圖調整此數值】
-    entryId: "fuji",
-  },
-  {
-    id: "shidare",
-    label: "枝垂櫻區",
-    description: "瀑布般垂落的粉紅花簾",
-    scale: 1.8,
-    x: 22,    // 【請依照地圖調整此數值】
-    y: -5,    // 【請依照地圖調整此數值】
-    entryId: "shidare",
-  },
-  {
-    id: "yae",
-    label: "八重櫻區",
-    description: "層疊繁複，春末壓軸貴族",
-    scale: 1.8,
-    x: -5,    // 【請依照地圖調整此數值】
-    y: 22,    // 【請依照地圖調整此數值】
-    entryId: "yae",
-  },
-  {
-    id: "sumizome",
-    label: "墨染櫻區",
-    description: "白如霜雪，清冷脫俗",
-    scale: 1.8,
-    x: 28,    // 【請依照地圖調整此數值】
-    y: 15,    // 【請依照地圖調整此數值】
-    entryId: "sumizome",
-  },
-  {
     id: "final",
     label: "園區全覽",
     description: "感謝您探索中台庭園的七大櫻花品種",
@@ -114,7 +87,7 @@ const MAP_STEPS = [
 const entryMap = Object.fromEntries(entries.map((e) => [e.id, e]));
 ---
 
-<section id="cherry-map-section" class="relative py-16 overflow-hidden">
+<section id="cherry-map-section" class="relative py-16">
   <div class="container mb-8 text-center">
     <h2 class="text-txt-p dark:text-darkmode-txt-p mb-2 intersect:animate-fadeUp opacity-0">
       園區分佈導覽
@@ -135,17 +108,9 @@ const entryMap = Object.fromEntries(entries.map((e) => [e.id, e]));
            【請將園區地圖放置於 /public/images/cherry/garden-map.jpg】 -->
       <div
         id="cherry-map-image"
-        class="w-full h-full bg-stone-200 dark:bg-stone-700 bg-cover bg-center transition-transform duration-700 ease-out"
+        class="w-full h-full bg-stone-200 dark:bg-stone-700 bg-contain bg-center bg-no-repeat transition-transform duration-700 ease-out"
         style={`background-image: url('${mapImageUrl}');`}
       >
-        <!-- 未放置地圖圖片時的備援畫面 -->
-        <div id="cherry-map-placeholder" class="w-full h-full flex flex-col items-center justify-center text-stone-400 dark:text-stone-500">
-          <div class="text-6xl mb-4">🗺️</div>
-          <p class="font-secondary text-sm text-center max-w-xs">
-            請將園區地圖圖片放置於<br />
-            <code class="bg-stone-100 dark:bg-stone-800 px-1 rounded">/public/images/cherry/garden-map.jpg</code>
-          </p>
-        </div>
       </div>
 
       <!-- 品種熱點標記（由 JS 動態顯示）-->
@@ -193,12 +158,13 @@ const entryMap = Object.fromEntries(entries.map((e) => [e.id, e]));
       </div>
     </div>
 
-    <!-- 捲動空間（每個步驟佔 100vh）-->
+    <!-- 捲動空間（每個步驟佔 50vh）步驟一 5vh-->
     <div id="cherry-scroll-spacer">
       {MAP_STEPS.map((step, i) => (
         <div
           data-step={i}
-          class="cherry-step-trigger h-screen flex items-center"
+          class="cherry-step-trigger h-[50vh] flex items-center"
+          style={i === 0 ? "height: 5vh;" : ""}
           aria-hidden="true"
         />
       ))}
@@ -226,14 +192,11 @@ const entryMap = Object.fromEntries(entries.map((e) => [e.id, e]));
     // 【說明】scale：縮放倍率，x/y：位移百分比（向左/上為負值）
     const steps = [
       { scale: 1,   x: "0%",    y: "0%",    label: "園區全覽",   desc: "中台庭園七大櫻花品種分佈全覽",       markers: [] },
-      { scale: 1.8, x: "-15%",  y: "-8%",   label: "河津櫻區",   desc: "一月下旬率先盛開，迎接春天的使者",   markers: ["kawazu"] },
-      { scale: 1.8, x: "8%",    y: "-15%",  label: "福爾摩沙區", desc: "台灣原生種，緋紅鐘型花朵",           markers: ["kawazu", "formosana"] },
-      { scale: 1.8, x: "18%",   y: "8%",    label: "椿寒櫻區",   desc: "寒冬中的玫瑰紅燃放",               markers: ["kawazu", "formosana", "tsubakikanzan"] },
-      { scale: 1.8, x: "-8%",   y: "18%",   label: "富士櫻區",   desc: "淡粉白花朵，如雪般輕盈",           markers: ["kawazu", "formosana", "tsubakikanzan", "fuji"] },
-      { scale: 1.8, x: "22%",   y: "-5%",   label: "枝垂櫻區",   desc: "瀑布般垂落的粉紅花簾",             markers: ["kawazu", "formosana", "tsubakikanzan", "fuji", "shidare"] },
-      { scale: 1.8, x: "-5%",   y: "22%",   label: "八重櫻區",   desc: "層疊繁複，春末壓軸貴族",           markers: ["kawazu", "formosana", "tsubakikanzan", "fuji", "shidare", "yae"] },
-      { scale: 1.8, x: "28%",   y: "15%",   label: "墨染櫻區",   desc: "白如霜雪，清冷脫俗",               markers: ["kawazu", "formosana", "tsubakikanzan", "fuji", "shidare", "yae", "sumizome"] },
-      { scale: 1,   x: "0%",    y: "0%",    label: "探索完成",   desc: "感謝您探索中台庭園的七大櫻花品種",   markers: ["kawazu", "formosana", "tsubakikanzan", "fuji", "shidare", "yae", "sumizome"] },
+      { scale: 1.8, x: "-70%",   y: "30%",   label: "八重櫻區",   desc: "層疊繁複，春末壓軸貴族",           markers: [ "yae"] },
+       { scale: 1.8, x: "-50%",   y: "20%",   label: "枝垂櫻區",   desc: "瀑布般垂落的粉紅花簾",             markers: ["shidare"] },
+      { scale: 1.8, x: "-20%",  y: "50%",   label: "河津櫻區",   desc: "一月下旬率先盛開，迎接春天的使者",   markers: ["kawazu"] },
+      { scale: 1.8, x: "40%",    y: "-20%",  label: "福爾摩沙區", desc: "台灣原生種，緋紅鐘型花朵",           markers: ["formosana"] },
+      { scale: 1,   x: "0%",    y: "0%",    label: "探索完成",   desc: "感謝您探索中台庭園的七大櫻花品種",   markers: [] },
     ];
 
     let currentStep = 0;

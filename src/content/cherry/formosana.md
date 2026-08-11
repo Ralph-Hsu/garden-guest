@@ -9,8 +9,8 @@ gallery:
 bloomSeason: 1月～2月
 color: 緋紅
 mapPosition:
-  x: 45
-  y: 30
+  x: 50
+  y: 80
   label: 福爾摩沙區
 order: 2
 draft: false

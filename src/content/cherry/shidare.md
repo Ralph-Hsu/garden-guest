@@ -9,8 +9,8 @@ gallery:
 bloomSeason: 2月～3月
 color: 淡粉紅
 mapPosition:
-  x: 72
-  y: 40
+  x: 46
+  y: 85
   label: 枝垂櫻區
 order: 5
 draft: false

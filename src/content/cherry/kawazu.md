@@ -9,8 +9,8 @@ gallery:
 bloomSeason: 1月下旬～2月
 color: 深粉紅
 mapPosition:
-  x: 25
-  y: 40
+  x: 60
+  y: 60
   label: 河津櫻區
 order: 1
 draft: false
