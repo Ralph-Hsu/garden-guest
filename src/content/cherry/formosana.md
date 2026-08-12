@@ -7,7 +7,6 @@ gallery:
   - /images/cherry/formosana/01.jpg
   - /images/cherry/formosana/02.jpg
 bloomSeason: 1月～2月
-color: 白
 mapPosition:
   x: 50
   y: 80

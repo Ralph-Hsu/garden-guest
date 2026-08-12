@@ -7,7 +7,6 @@ gallery:
   - /images/cherry/fuji/01.jpg
   - /images/cherry/fuji/02.jpg
 bloomSeason: 2月中旬～3月
-color: 淡粉白
 mapPosition:
   x: 35
   y: 65

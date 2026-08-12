@@ -7,8 +7,7 @@ gallery:
   - /images/cherry/shidare/01.jpg
   - /images/cherry/shidare/02.jpg
 bloomSeason: 1月下旬～2月
-color: 淡粉紅
-mapPosition:
+smapPosition:
   x: 46
   y: 85
   label: 妙覺停車場

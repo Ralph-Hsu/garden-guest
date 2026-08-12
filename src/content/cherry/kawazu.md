@@ -9,7 +9,6 @@ gallery:
   - /images/cherry/kawazu/03.jpg
   - /images/cherry/kawazu/04.jpg
 bloomSeason: 1月下旬～2月
-color: 深粉紅
 mapPosition:
   x: 60
   y: 60

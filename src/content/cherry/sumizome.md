@@ -6,7 +6,6 @@ image: /images/cherry/sumizome/cover.jpg
 gallery:
   - /images/cherry/sumizome/01.jpg
 bloomSeason: 3月
-color: 白至極淡粉
 mapPosition:
   x: 80
   y: 60

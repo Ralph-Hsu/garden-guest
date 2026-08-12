@@ -6,7 +6,6 @@ image: /images/cherry/tsubakikanzan/cover.jpg
 gallery:
   - /images/cherry/tsubakikanzan/01.jpg
 bloomSeason: 2月上旬～3上旬月
-color: 玫瑰紅
 mapPosition:
   x: 60
   y: 55
