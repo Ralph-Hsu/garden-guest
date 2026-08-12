@@ -11,7 +11,6 @@ export type FloraEntry = CollectionEntry<"flora">;
 export type NewsEntry = CollectionEntry<"news">;
 
 // 原有（保留）
-export type AboutEntry = CollectionEntry<"about">;
 export type AuthorsEntry = CollectionEntry<"authors">;
 export type BlogEntry = CollectionEntry<"blog">;
 export type DocsEntry = CollectionEntry<"docs">;
@@ -23,7 +22,6 @@ export type RecipesEntry = CollectionEntry<"recipes">;
 export type TermsEntry = CollectionEntry<"terms">;
 
 export type SearchableEntry =
-  | AboutEntry
   | AuthorsEntry
   | BonsaiEntry
   | CherryEntry

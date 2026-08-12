@@ -127,15 +127,6 @@ const news = defineCollection({
 // 原有 Collections（保留，導覽已隱藏）
 // =============================================
 
-const about = defineCollection({
-  loader: glob({ pattern: "-index.{md,mdx}", base: "./src/content/about" }),
-  schema: ({ image }) =>
-    searchable.extend({
-      image: image().optional(),
-      imageAlt: z.string().default(""),
-    }),
-});
-
 const authors = defineCollection({
   loader: glob({
     pattern: "**\/[^_]*.{md,mdx}",
@@ -274,7 +265,6 @@ export const collections = {
   flora,
   news,
   // 原有（保留）
-  about,
   authors,
   blog,
   docs,
