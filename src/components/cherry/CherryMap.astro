@@ -191,12 +191,12 @@ const entryMap = Object.fromEntries(entries.map((e) => [e.id, e]));
     // 定義各步驟的地圖動畫參數
     // 【說明】scale：縮放倍率，x/y：位移百分比（向左/上為負值）
     const steps = [
-      { scale: 1,   x: "0%",    y: "0%",    label: "園區全覽",   desc: "中台庭園七大櫻花品種分佈全覽",       markers: [] },
+      { scale: 1,   x: "0%",    y: "0%",    label: "園區全覽",   desc: "中台庭園櫻花品種分佈全覽",       markers: [] },
       { scale: 1.8, x: "-70%",   y: "30%",   label: "八重櫻區",   desc: "層疊繁複，春末壓軸貴族",           markers: [ "yae"] },
        { scale: 1.8, x: "-50%",   y: "20%",   label: "枝垂櫻區",   desc: "瀑布般垂落的粉紅花簾",             markers: ["shidare"] },
       { scale: 1.8, x: "-20%",  y: "50%",   label: "河津櫻區",   desc: "一月下旬率先盛開，迎接春天的使者",   markers: ["kawazu"] },
-      { scale: 1.8, x: "40%",    y: "-20%",  label: "福爾摩沙區", desc: "台灣原生種，緋紅鐘型花朵",           markers: ["formosana"] },
-      { scale: 1,   x: "0%",    y: "0%",    label: "探索完成",   desc: "感謝您探索中台庭園的七大櫻花品種",   markers: [] },
+      { scale: 1.8, x: "40%",    y: "-20%",  label: "福爾摩沙區", desc: "台灣原生種，雪白鐘型花朵",           markers: ["formosana"] },
+      { scale: 1,   x: "0%",    y: "0%",    label: "探索完成",   desc: "感謝您探索中台庭園的櫻花品種",   markers: [] },
     ];
 
     let currentStep = 0;
