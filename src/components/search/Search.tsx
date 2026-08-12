@@ -16,7 +16,13 @@ interface SearchResult {
 }
 
 const getPath = (entry: SearchableEntry) => {
-  return `${entry.collection}/${entry.id.replace("-index", "")}`;
+  const normalizedId = entry.id.replace("-index", "");
+
+  if (entry.collection === "lotus") {
+    return `${entry.collection}/${normalizedId.replace(/^.*\//, "")}`;
+  }
+
+  return `${entry.collection}/${normalizedId}`;
 };
 
 const SearchPage = ({ searchList }: Props) => {
@@ -29,10 +35,18 @@ const SearchPage = ({ searchList }: Props) => {
   };
 
   const fuse = new Fuse(searchList, {
-    keys: ["data.title", "data.description", "id", "collection", "body"],
+    keys: [
+      { name: "data.title", weight: 2 },
+      { name: "data.latinName", weight: 2 },
+      { name: "data.description", weight: 1.2 },
+      { name: "id", weight: 0.8 },
+      { name: "collection", weight: 0.6 },
+      { name: "body", weight: 1 },
+    ],
     includeMatches: true,
-    minMatchCharLength: 3,
-    threshold: 0.5,
+    minMatchCharLength: 1,
+    threshold: 0.45,
+    ignoreLocation: true,
   });
 
   useEffect(() => {
@@ -47,12 +61,13 @@ const SearchPage = ({ searchList }: Props) => {
   }, []);
 
   useEffect(() => {
-    let inputResult = inputVal.length > 2 ? fuse.search(inputVal) : [];
+    const normalizedInput = inputVal.trim();
+    const inputResult = normalizedInput.length > 0 ? fuse.search(normalizedInput) : [];
     setSearchResults(inputResult);
 
-    if (inputVal.length > 0) {
+    if (normalizedInput.length > 0) {
       const searchParams = new URLSearchParams(window.location.search);
-      searchParams.set("q", inputVal);
+      searchParams.set("q", normalizedInput);
       const newRelativePathQuery =
         window.location.pathname + "?" + searchParams.toString();
       history.pushState(null, "", newRelativePathQuery);
@@ -69,7 +84,7 @@ const SearchPage = ({ searchList }: Props) => {
             <div className="flex flex-nowrap">
               <input
                 className="w-full glass rounded-lg px-6 py-4 text-txt-p placeholder:text-txt-light dark:placeholder:text-darkmode-txt-light focus:border-darkmode-border focus:ring-transparent dark:text-darkmode-txt-light intersect:animate-fadeDown opacity-0 intersect-no-queue"
-                placeholder="search posts"
+                placeholder="搜尋品種 / 中文名 / 學名"
                 type="search"
                 name="search"
                 value={inputVal}
