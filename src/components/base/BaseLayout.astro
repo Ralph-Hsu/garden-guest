@@ -144,5 +144,93 @@ const htmlBackgroundStyle = [
     </main>
     <Footer />
     <ObserverScript />
+    <script is:inline>
+      (() => {
+        const storageKey = "garden-guest-under-construction-dismissed";
+
+        if (window.localStorage.getItem(storageKey) === "true") {
+          return;
+        }
+
+        const overlay = document.createElement("div");
+        overlay.setAttribute("aria-hidden", "false");
+        overlay.style.position = "fixed";
+        overlay.style.inset = "0";
+        overlay.style.display = "flex";
+        overlay.style.alignItems = "center";
+        overlay.style.justifyContent = "center";
+        overlay.style.background = "rgba(17, 24, 39, 0.6)";
+        overlay.style.zIndex = "9999";
+        overlay.style.padding = "1rem";
+
+        const dialog = document.createElement("div");
+        dialog.setAttribute("role", "dialog");
+        dialog.setAttribute("aria-modal", "true");
+        dialog.setAttribute("aria-labelledby", "under-construction-title");
+        dialog.style.width = "min(100%, 28rem)";
+        dialog.style.background = "#fffdf7";
+        dialog.style.border = "1px solid rgba(120, 113, 108, 0.35)";
+        dialog.style.borderRadius = "1rem";
+        dialog.style.boxShadow = "0 24px 60px rgba(17, 24, 39, 0.22)";
+        dialog.style.padding = "1.5rem";
+        dialog.style.textAlign = "center";
+
+        const title = document.createElement("h2");
+        title.id = "under-construction-title";
+        title.textContent = "網站開發中";
+        title.style.margin = "0 0 0.75rem";
+        title.style.color = "#292524";
+        title.style.fontSize = "1.5rem";
+        title.style.fontWeight = "700";
+
+        const description = document.createElement("p");
+        description.textContent = "此網頁仍在開發中，請多見諒，敬請期待。";
+        description.style.margin = "0 0 1.25rem";
+        description.style.color = "#44403c";
+        description.style.lineHeight = "1.7";
+        description.style.fontSize = "1rem";
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.textContent = "我知道了";
+        button.style.border = "none";
+        button.style.borderRadius = "0.75rem";
+        button.style.background = "#b45309";
+        button.style.color = "#fff";
+        button.style.cursor = "pointer";
+        button.style.fontSize = "1rem";
+        button.style.fontWeight = "600";
+        button.style.padding = "0.75rem 1.5rem";
+        button.style.transition = "opacity 0.2s ease";
+        button.addEventListener("mouseenter", () => {
+          button.style.opacity = "0.9";
+        });
+        button.addEventListener("mouseleave", () => {
+          button.style.opacity = "1";
+        });
+
+        const closeDialog = () => {
+          window.localStorage.setItem(storageKey, "true");
+          overlay.remove();
+        };
+
+        button.addEventListener("click", closeDialog);
+        overlay.addEventListener("click", (event) => {
+          if (event.target === overlay) {
+            closeDialog();
+          }
+        });
+
+        document.addEventListener("keydown", (event) => {
+          if (event.key === "Escape") {
+            closeDialog();
+          }
+        });
+
+        dialog.append(title, description, button);
+        overlay.appendChild(dialog);
+        document.body.appendChild(overlay);
+      })();
+    </script>
   </body>
 </html>
