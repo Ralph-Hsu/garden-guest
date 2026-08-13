@@ -96,7 +96,7 @@ const searchUrl = withBasePath("/search");
               data-nav-link
               data-nav-url={item.url}
               class={`block px-2 py-2 font-secondary font-semibold text-sm text-txt-p transition dark:text-darkmode-txt-p lg:px-2 lg:py-3 ${
-                isMenuActive(currentPath, item.url)
+                isMenuActive(currentPath ?? "/", item.url ?? "/")
                   ? activeLinkClasses
                   : inactiveLinkClasses
               }`}
@@ -134,12 +134,12 @@ const searchUrl = withBasePath("/search");
     "dark:hover:text-amber-300",
   ];
 
-  const normalizePath = (path) => {
+  const normalizePath = (path: string) => {
     if (path === "/") return "/";
     return path.endsWith("/") ? path.slice(0, -1) : path;
   };
 
-  const stripBasePath = (path) => {
+  const stripBasePath = (path: string) => {
     const baseUrl = import.meta.env.BASE_URL || "/";
     const basePrefix = baseUrl === "/" ? "" : baseUrl.replace(/\/$/, "");
     if (!basePrefix) return path;
@@ -147,7 +147,7 @@ const searchUrl = withBasePath("/search");
     return path.startsWith(`${basePrefix}/`) ? path.slice(basePrefix.length) : path;
   };
 
-  const isMenuActive = (currentPath, itemUrl) => {
+  const isMenuActive = (currentPath: string, itemUrl: string) => {
     const normalizedCurrentPath = normalizePath(currentPath);
     const normalizedItemUrl = normalizePath(itemUrl);
 
@@ -158,9 +158,16 @@ const searchUrl = withBasePath("/search");
     );
   };
 
+  const closeMobileMenu = () => {
+    const navToggle = document.getElementById("nav-toggle");
+    if (navToggle instanceof HTMLInputElement) {
+      navToggle.checked = false;
+    }
+  };
+
   const updateActiveMenuItem = () => {
     const currentPath = stripBasePath(window.location.pathname);
-    const links = document.querySelectorAll("[data-nav-link]");
+    const links = document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]");
 
     links.forEach((link) => {
       const itemUrl = link.dataset.navUrl || "/";
@@ -171,6 +178,13 @@ const searchUrl = withBasePath("/search");
     });
   };
 
+  document.querySelectorAll<HTMLAnchorElement>("[data-nav-link]").forEach((link) => {
+    link.addEventListener("click", closeMobileMenu);
+  });
+
   updateActiveMenuItem();
-  document.addEventListener("astro:page-load", updateActiveMenuItem);
+  document.addEventListener("astro:page-load", () => {
+    closeMobileMenu();
+    updateActiveMenuItem();
+  });
 </script>
