@@ -1,0 +1,370 @@
+---
+import { withBasePath } from "@lib/url";
+
+const mapImageUrl = withBasePath("/images/cherry/garden-map.jpg");
+---
+
+<section class="section container">
+  <div class="text-center mb-6 intersect:animate-fadeUp opacity-0">
+    <h2 class="text-txt-p dark:text-darkmode-txt-p mb-2">園區櫻花地圖</h2>
+    <p class="font-secondary text-txt-light dark:text-darkmode-txt-light text-sm">
+      手機可雙指縮放，放大後可拖移查看細節
+    </p>
+  </div>
+
+  <div class="max-w-5xl mx-auto">
+    <div id="cherry-map-shell" class="glass rounded-2xl p-3 sm:p-4">
+      <div
+        id="cherry-map-viewport"
+        class="relative overflow-hidden rounded-xl bg-stone-100 dark:bg-stone-800 touch-none"
+      >
+        <img
+          id="cherry-map-image"
+          src={mapImageUrl}
+          alt="中台庭園櫻花園區導覽地圖"
+          class="block w-full h-auto max-w-none select-none pointer-events-none will-change-transform"
+          draggable="false"
+        />
+      </div>
+
+      <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <p class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light">
+          提示：放大後可拖曳地圖，按「重設」返回全圖。
+        </p>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            class="cherry-map-control rounded-lg px-3 py-1.5 text-sm bg-stone-200 hover:bg-stone-300 dark:bg-stone-700 dark:hover:bg-stone-600 transition-colors"
+            data-action="zoom-out"
+            aria-label="縮小地圖"
+          >
+            －
+          </button>
+          <span
+            id="cherry-map-scale"
+            class="font-secondary text-xs min-w-[3.5rem] text-center text-txt-light dark:text-darkmode-txt-light"
+          >
+            100%
+          </span>
+          <button
+            type="button"
+            class="cherry-map-control rounded-lg px-3 py-1.5 text-sm bg-stone-200 hover:bg-stone-300 dark:bg-stone-700 dark:hover:bg-stone-600 transition-colors"
+            data-action="zoom-in"
+            aria-label="放大地圖"
+          >
+            ＋
+          </button>
+          <button
+            type="button"
+            class="cherry-map-control rounded-lg px-3 py-1.5 text-sm bg-garden-amber text-white hover:brightness-95 transition"
+            data-action="reset"
+            aria-label="重設地圖縮放"
+          >
+            重設
+          </button>
+          <button
+            type="button"
+            class="cherry-map-control rounded-lg px-3 py-1.5 text-sm bg-stone-900 text-white hover:bg-stone-800 dark:bg-stone-600 dark:hover:bg-stone-500 transition-colors"
+            data-action="fullscreen"
+            aria-label="全螢幕檢視地圖"
+          >
+            全螢幕
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  function initCherryMapZoom() {
+    const viewport = document.getElementById("cherry-map-viewport") as HTMLElement | null;
+    const shell = document.getElementById("cherry-map-shell") as HTMLElement | null;
+    const image = document.getElementById("cherry-map-image") as HTMLImageElement | null;
+    const scaleLabel = document.getElementById("cherry-map-scale") as HTMLElement | null;
+    const controls = shell?.querySelectorAll<HTMLButtonElement>(".cherry-map-control") ?? [];
+    const fullscreenButton = shell?.querySelector<HTMLButtonElement>('[data-action="fullscreen"]') ?? null;
+
+    if (!viewport || !shell || !image) return;
+    if (viewport.dataset.initialized === "true") return;
+    viewport.dataset.initialized = "true";
+
+    const MIN_SCALE = 1;
+    const MAX_SCALE = 4;
+    const SCALE_STEP = 0.35;
+
+    let scale = 1;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    let isPointerDragging = false;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let dragStartOffsetX = 0;
+    let dragStartOffsetY = 0;
+    let activePointerId: number | null = null;
+
+    let touchDragging = false;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchStartOffsetX = 0;
+    let touchStartOffsetY = 0;
+
+    let pinchStartDistance = 0;
+    let pinchStartScale = 1;
+
+    function clamp(value: number, min: number, max: number) {
+      return Math.min(Math.max(value, min), max);
+    }
+
+    function getMaxOffsets(nextScale: number) {
+      const viewportWidth = viewport.clientWidth;
+      const viewportHeight = viewport.clientHeight;
+      const imageWidth = image.clientWidth;
+      const imageHeight = image.clientHeight;
+
+      const scaledWidth = imageWidth * nextScale;
+      const scaledHeight = imageHeight * nextScale;
+
+      return {
+        maxX: Math.max(0, (scaledWidth - viewportWidth) / 2),
+        maxY: Math.max(0, (scaledHeight - viewportHeight) / 2),
+      };
+    }
+
+    function applyTransform() {
+      const { maxX, maxY } = getMaxOffsets(scale);
+      offsetX = clamp(offsetX, -maxX, maxX);
+      offsetY = clamp(offsetY, -maxY, maxY);
+
+      image.style.transform = `translate3d(${offsetX}px, ${offsetY}px, 0) scale(${scale})`;
+      image.style.transformOrigin = "center center";
+
+      if (scaleLabel) {
+        scaleLabel.textContent = `${Math.round(scale * 100)}%`;
+      }
+    }
+
+    function setScale(nextScale: number) {
+      scale = clamp(nextScale, MIN_SCALE, MAX_SCALE);
+      if (scale === MIN_SCALE) {
+        offsetX = 0;
+        offsetY = 0;
+      }
+      applyTransform();
+    }
+
+    function getTouchDistance(t1: Touch, t2: Touch) {
+      const dx = t1.clientX - t2.clientX;
+      const dy = t1.clientY - t2.clientY;
+      return Math.hypot(dx, dy);
+    }
+
+    function onPointerDown(event: PointerEvent) {
+      if (event.pointerType === "touch") return;
+      if (scale <= MIN_SCALE) return;
+
+      activePointerId = event.pointerId;
+      isPointerDragging = true;
+      dragStartX = event.clientX;
+      dragStartY = event.clientY;
+      dragStartOffsetX = offsetX;
+      dragStartOffsetY = offsetY;
+      viewport.setPointerCapture(event.pointerId);
+    }
+
+    function onPointerMove(event: PointerEvent) {
+      if (!isPointerDragging || activePointerId !== event.pointerId) return;
+
+      offsetX = dragStartOffsetX + (event.clientX - dragStartX);
+      offsetY = dragStartOffsetY + (event.clientY - dragStartY);
+      applyTransform();
+    }
+
+    function endPointerDrag(event: PointerEvent) {
+      if (activePointerId === event.pointerId) {
+        isPointerDragging = false;
+        activePointerId = null;
+        viewport.releasePointerCapture(event.pointerId);
+      }
+    }
+
+    function onTouchStart(event: TouchEvent) {
+      if (event.touches.length === 1) {
+        touchDragging = scale > MIN_SCALE;
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+        touchStartOffsetX = offsetX;
+        touchStartOffsetY = offsetY;
+      } else if (event.touches.length === 2) {
+        touchDragging = false;
+        pinchStartDistance = getTouchDistance(event.touches[0], event.touches[1]);
+        pinchStartScale = scale;
+      }
+    }
+
+    function onTouchMove(event: TouchEvent) {
+      if (event.touches.length === 2) {
+        event.preventDefault();
+        const distance = getTouchDistance(event.touches[0], event.touches[1]);
+        if (pinchStartDistance > 0) {
+          setScale(pinchStartScale * (distance / pinchStartDistance));
+        }
+        return;
+      }
+
+      if (!touchDragging || event.touches.length !== 1) return;
+      event.preventDefault();
+
+      offsetX = touchStartOffsetX + (event.touches[0].clientX - touchStartX);
+      offsetY = touchStartOffsetY + (event.touches[0].clientY - touchStartY);
+      applyTransform();
+    }
+
+    function onTouchEnd(event: TouchEvent) {
+      if (event.touches.length === 1 && scale > MIN_SCALE) {
+        touchDragging = true;
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+        touchStartOffsetX = offsetX;
+        touchStartOffsetY = offsetY;
+      } else if (scale <= MIN_SCALE || event.touches.length === 0) {
+        touchDragging = false;
+      }
+      pinchStartDistance = 0;
+    }
+
+    function onWheel(event: WheelEvent) {
+      event.preventDefault();
+      const direction = event.deltaY > 0 ? -1 : 1;
+      setScale(scale + direction * SCALE_STEP);
+    }
+
+    function isPseudoFullscreen() {
+      return shell.classList.contains("cherry-map-shell--pseudo-fullscreen");
+    }
+
+    function setPseudoFullscreen(enabled: boolean) {
+      shell.classList.toggle("cherry-map-shell--pseudo-fullscreen", enabled);
+      document.body.classList.toggle("cherry-map-no-scroll", enabled);
+      applyTransform();
+    }
+
+    async function toggleFullscreen() {
+      if (document.fullscreenElement === shell) {
+        await document.exitFullscreen();
+        return;
+      }
+      if (isPseudoFullscreen()) {
+        setPseudoFullscreen(false);
+        syncFullscreenButtonLabel();
+        return;
+      }
+
+      const supportsFullscreen =
+        typeof document.fullscreenEnabled === "boolean" &&
+        document.fullscreenEnabled &&
+        typeof shell.requestFullscreen === "function";
+      if (supportsFullscreen) {
+        await shell.requestFullscreen();
+        return;
+      }
+
+      setPseudoFullscreen(true);
+      syncFullscreenButtonLabel();
+    }
+
+    function syncFullscreenButtonLabel() {
+      if (!fullscreenButton) return;
+      const active = document.fullscreenElement === shell || isPseudoFullscreen();
+      fullscreenButton.textContent = active ? "離開全螢幕" : "全螢幕";
+      shell.classList.toggle("cherry-map-shell--fullscreen-active", active);
+    }
+
+    viewport.addEventListener("pointerdown", onPointerDown);
+    viewport.addEventListener("pointermove", onPointerMove);
+    viewport.addEventListener("pointerup", endPointerDrag);
+    viewport.addEventListener("pointercancel", endPointerDrag);
+    viewport.addEventListener("touchstart", onTouchStart, { passive: true });
+    viewport.addEventListener("touchmove", onTouchMove, { passive: false });
+    viewport.addEventListener("touchend", onTouchEnd, { passive: true });
+    viewport.addEventListener("touchcancel", onTouchEnd, { passive: true });
+    viewport.addEventListener("wheel", onWheel, { passive: false });
+
+    controls.forEach((button) => {
+      button.addEventListener("click", () => {
+        const action = button.dataset.action;
+        if (action === "zoom-in") {
+          setScale(scale + SCALE_STEP);
+        } else if (action === "zoom-out") {
+          setScale(scale - SCALE_STEP);
+        } else if (action === "reset") {
+          setScale(MIN_SCALE);
+        } else if (action === "fullscreen") {
+          toggleFullscreen().catch(() => {
+            console.warn("Fullscreen request was blocked by the browser.");
+          });
+        }
+      });
+    });
+
+    if (image.complete) {
+      applyTransform();
+    } else {
+      image.addEventListener("load", applyTransform, { once: true });
+    }
+    const onResize = () => {
+      if (!document.body.contains(viewport)) {
+        window.removeEventListener("resize", onResize);
+        document.removeEventListener("fullscreenchange", syncFullscreenButtonLabel);
+        document.body.classList.remove("cherry-map-no-scroll");
+        return;
+      }
+      applyTransform();
+    };
+    window.addEventListener("resize", onResize);
+    document.addEventListener("fullscreenchange", syncFullscreenButtonLabel);
+    syncFullscreenButtonLabel();
+  }
+
+  initCherryMapZoom();
+  document.addEventListener("astro:after-swap", initCherryMapZoom);
+</script>
+
+<style>
+  :global(body.cherry-map-no-scroll) {
+    overflow: hidden;
+  }
+
+  .cherry-map-shell--fullscreen-active {
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    margin: 0;
+    border-radius: 0;
+    background: rgba(15, 23, 42, 0.96);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cherry-map-shell--fullscreen-active #cherry-map-viewport {
+    flex: 1;
+    min-height: 0;
+  }
+
+  .cherry-map-shell--pseudo-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    margin: 0;
+    border-radius: 0;
+    background: rgba(15, 23, 42, 0.96);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .cherry-map-shell--pseudo-fullscreen #cherry-map-viewport {
+    flex: 1;
+    min-height: 0;
+  }
+</style>
