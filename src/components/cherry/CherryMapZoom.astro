@@ -16,20 +16,20 @@ const mapImageUrl = withBasePath("/images/cherry/garden-map.jpg");
     <div id="cherry-map-shell" class="glass rounded-2xl p-3 sm:p-4">
       <div
         id="cherry-map-viewport"
-        class="relative overflow-hidden rounded-xl bg-stone-100 dark:bg-stone-800 touch-none"
+        class="relative overflow-hidden rounded-xl bg-stone-100 dark:bg-stone-800 touch-none flex items-center justify-center"
       >
         <img
           id="cherry-map-image"
           src={mapImageUrl}
           alt="中台庭園櫻花園區導覽地圖"
-          class="block w-full h-auto max-w-none select-none pointer-events-none will-change-transform"
+          class="block w-full h-auto max-w-full select-none pointer-events-none will-change-transform"
           draggable="false"
         />
       </div>
 
       <div class="mt-4 flex flex-wrap items-center justify-between gap-3">
         <p class="font-secondary text-xs text-txt-light dark:text-darkmode-txt-light">
-          提示：放大後可拖曳地圖，按「重設」返回全圖。
+          提示：100% 與放大狀態都可拖曳地圖，支援慣性與回彈，按「重設」返回全圖。
         </p>
         <div class="flex items-center gap-2">
           <button
@@ -90,7 +90,7 @@ const mapImageUrl = withBasePath("/images/cherry/garden-map.jpg");
     viewport.dataset.initialized = "true";
 
     const MIN_SCALE = 1;
-    const MAX_SCALE = 4;
+    const MAX_SCALE = 6;
     const SCALE_STEP = 0.35;
 
     let scale = 1;
@@ -112,6 +112,19 @@ const mapImageUrl = withBasePath("/images/cherry/garden-map.jpg");
 
     let pinchStartDistance = 0;
     let pinchStartScale = 1;
+    let wasFullscreenActive = false;
+    let velocityX = 0;
+    let velocityY = 0;
+    let lastMoveX = 0;
+    let lastMoveY = 0;
+    let lastMoveTime = 0;
+    let inertiaFrameId: number | null = null;
+
+    const EDGE_RESISTANCE = 0.35;
+    const INERTIA_FRICTION = 0.92;
+    const INERTIA_MIN_SPEED = 0.08;
+    const SPRING_STRENGTH = 0.12;
+    const SPRING_DAMPING = 0.82;
 
     function clamp(value: number, min: number, max: number) {
       return Math.min(Math.max(value, min), max);
@@ -120,11 +133,11 @@ const mapImageUrl = withBasePath("/images/cherry/garden-map.jpg");
     function getMaxOffsets(nextScale: number) {
       const viewportWidth = viewport.clientWidth;
       const viewportHeight = viewport.clientHeight;
-      const imageWidth = image.clientWidth;
-      const imageHeight = image.clientHeight;
-
-      const scaledWidth = imageWidth * nextScale;
-      const scaledHeight = imageHeight * nextScale;
+      const imageRect = image.getBoundingClientRect();
+      const baseWidth = scale > 0 ? imageRect.width / scale : imageRect.width;
+      const baseHeight = scale > 0 ? imageRect.height / scale : imageRect.height;
+      const scaledWidth = baseWidth * nextScale;
+      const scaledHeight = baseHeight * nextScale;
 
       return {
         maxX: Math.max(0, (scaledWidth - viewportWidth) / 2),
@@ -132,12 +145,30 @@ const mapImageUrl = withBasePath("/images/cherry/garden-map.jpg");
       };
     }
 
-    function applyTransform() {
-      const { maxX, maxY } = getMaxOffsets(scale);
-      offsetX = clamp(offsetX, -maxX, maxX);
-      offsetY = clamp(offsetY, -maxY, maxY);
+    function applyEdgeResistance(value: number, max: number) {
+      if (Math.abs(value) <= max) return value;
+      const sign = value >= 0 ? 1 : -1;
+      const extra = Math.abs(value) - max;
+      return sign * (max + extra * EDGE_RESISTANCE);
+    }
 
-      image.style.transform = `translate3d(${offsetX}px, ${offsetY}px, 0) scale(${scale})`;
+    function stopInertia() {
+      if (inertiaFrameId !== null) {
+        cancelAnimationFrame(inertiaFrameId);
+        inertiaFrameId = null;
+      }
+    }
+
+    function applyTransform(clampToBounds = true) {
+      const { maxX, maxY } = getMaxOffsets(scale);
+      const renderX = clampToBounds ? clamp(offsetX, -maxX, maxX) : offsetX;
+      const renderY = clampToBounds ? clamp(offsetY, -maxY, maxY) : offsetY;
+      if (clampToBounds) {
+        offsetX = renderX;
+        offsetY = renderY;
+      }
+
+      image.style.transform = `matrix(${scale}, 0, 0, ${scale}, ${renderX}, ${renderY})`;
       image.style.transformOrigin = "center center";
 
       if (scaleLabel) {
@@ -146,12 +177,54 @@ const mapImageUrl = withBasePath("/images/cherry/garden-map.jpg");
     }
 
     function setScale(nextScale: number) {
+      stopInertia();
       scale = clamp(nextScale, MIN_SCALE, MAX_SCALE);
       if (scale === MIN_SCALE) {
         offsetX = 0;
         offsetY = 0;
       }
       applyTransform();
+    }
+
+    function startInertia() {
+      stopInertia();
+
+      const run = () => {
+        const { maxX, maxY } = getMaxOffsets(scale);
+        offsetX += velocityX;
+        offsetY += velocityY;
+        velocityX *= INERTIA_FRICTION;
+        velocityY *= INERTIA_FRICTION;
+
+        if (offsetX > maxX || offsetX < -maxX) {
+          const targetX = offsetX > 0 ? maxX : -maxX;
+          velocityX += (targetX - offsetX) * SPRING_STRENGTH;
+          velocityX *= SPRING_DAMPING;
+        }
+        if (offsetY > maxY || offsetY < -maxY) {
+          const targetY = offsetY > 0 ? maxY : -maxY;
+          velocityY += (targetY - offsetY) * SPRING_STRENGTH;
+          velocityY *= SPRING_DAMPING;
+        }
+
+        const clampedX = clamp(offsetX, -maxX, maxX);
+        const clampedY = clamp(offsetY, -maxY, maxY);
+        const nearStill = Math.abs(velocityX) < INERTIA_MIN_SPEED && Math.abs(velocityY) < INERTIA_MIN_SPEED;
+        const nearBounds = Math.abs(offsetX - clampedX) < 0.5 && Math.abs(offsetY - clampedY) < 0.5;
+
+        if (nearStill && nearBounds) {
+          offsetX = clampedX;
+          offsetY = clampedY;
+          applyTransform(true);
+          stopInertia();
+          return;
+        }
+
+        applyTransform(false);
+        inertiaFrameId = requestAnimationFrame(run);
+      };
+
+      inertiaFrameId = requestAnimationFrame(run);
     }
 
     function getTouchDistance(t1: Touch, t2: Touch) {
@@ -162,23 +235,40 @@ const mapImageUrl = withBasePath("/images/cherry/garden-map.jpg");
 
     function onPointerDown(event: PointerEvent) {
       if (event.pointerType === "touch") return;
-      if (scale <= MIN_SCALE) return;
 
+      stopInertia();
       activePointerId = event.pointerId;
       isPointerDragging = true;
       dragStartX = event.clientX;
       dragStartY = event.clientY;
       dragStartOffsetX = offsetX;
       dragStartOffsetY = offsetY;
+      lastMoveX = event.clientX;
+      lastMoveY = event.clientY;
+      lastMoveTime = performance.now();
+      velocityX = 0;
+      velocityY = 0;
       viewport.setPointerCapture(event.pointerId);
     }
 
     function onPointerMove(event: PointerEvent) {
       if (!isPointerDragging || activePointerId !== event.pointerId) return;
 
-      offsetX = dragStartOffsetX + (event.clientX - dragStartX);
-      offsetY = dragStartOffsetY + (event.clientY - dragStartY);
-      applyTransform();
+      const rawX = dragStartOffsetX + (event.clientX - dragStartX);
+      const rawY = dragStartOffsetY + (event.clientY - dragStartY);
+      const { maxX, maxY } = getMaxOffsets(scale);
+      offsetX = applyEdgeResistance(rawX, maxX);
+      offsetY = applyEdgeResistance(rawY, maxY);
+
+      const now = performance.now();
+      const dt = Math.max(now - lastMoveTime, 16);
+      velocityX = ((event.clientX - lastMoveX) / dt) * 16;
+      velocityY = ((event.clientY - lastMoveY) / dt) * 16;
+      lastMoveX = event.clientX;
+      lastMoveY = event.clientY;
+      lastMoveTime = now;
+
+      applyTransform(false);
     }
 
     function endPointerDrag(event: PointerEvent) {
@@ -186,17 +276,25 @@ const mapImageUrl = withBasePath("/images/cherry/garden-map.jpg");
         isPointerDragging = false;
         activePointerId = null;
         viewport.releasePointerCapture(event.pointerId);
+        startInertia();
       }
     }
 
     function onTouchStart(event: TouchEvent) {
       if (event.touches.length === 1) {
-        touchDragging = scale > MIN_SCALE;
+        stopInertia();
+        touchDragging = true;
         touchStartX = event.touches[0].clientX;
         touchStartY = event.touches[0].clientY;
         touchStartOffsetX = offsetX;
         touchStartOffsetY = offsetY;
+        lastMoveX = event.touches[0].clientX;
+        lastMoveY = event.touches[0].clientY;
+        lastMoveTime = performance.now();
+        velocityX = 0;
+        velocityY = 0;
       } else if (event.touches.length === 2) {
+        stopInertia();
         touchDragging = false;
         pinchStartDistance = getTouchDistance(event.touches[0], event.touches[1]);
         pinchStartScale = scale;
@@ -216,20 +314,40 @@ const mapImageUrl = withBasePath("/images/cherry/garden-map.jpg");
       if (!touchDragging || event.touches.length !== 1) return;
       event.preventDefault();
 
-      offsetX = touchStartOffsetX + (event.touches[0].clientX - touchStartX);
-      offsetY = touchStartOffsetY + (event.touches[0].clientY - touchStartY);
-      applyTransform();
+      const rawX = touchStartOffsetX + (event.touches[0].clientX - touchStartX);
+      const rawY = touchStartOffsetY + (event.touches[0].clientY - touchStartY);
+      const { maxX, maxY } = getMaxOffsets(scale);
+      offsetX = applyEdgeResistance(rawX, maxX);
+      offsetY = applyEdgeResistance(rawY, maxY);
+
+      const now = performance.now();
+      const dt = Math.max(now - lastMoveTime, 16);
+      velocityX = ((event.touches[0].clientX - lastMoveX) / dt) * 16;
+      velocityY = ((event.touches[0].clientY - lastMoveY) / dt) * 16;
+      lastMoveX = event.touches[0].clientX;
+      lastMoveY = event.touches[0].clientY;
+      lastMoveTime = now;
+
+      applyTransform(false);
     }
 
     function onTouchEnd(event: TouchEvent) {
-      if (event.touches.length === 1 && scale > MIN_SCALE) {
+      if (event.touches.length === 1) {
         touchDragging = true;
         touchStartX = event.touches[0].clientX;
         touchStartY = event.touches[0].clientY;
         touchStartOffsetX = offsetX;
         touchStartOffsetY = offsetY;
+        lastMoveX = event.touches[0].clientX;
+        lastMoveY = event.touches[0].clientY;
+        lastMoveTime = performance.now();
+        velocityX = 0;
+        velocityY = 0;
       } else if (scale <= MIN_SCALE || event.touches.length === 0) {
         touchDragging = false;
+      }
+      if (event.touches.length === 0) {
+        startInertia();
       }
       pinchStartDistance = 0;
     }
@@ -277,8 +395,12 @@ const mapImageUrl = withBasePath("/images/cherry/garden-map.jpg");
     function syncFullscreenButtonLabel() {
       if (!fullscreenButton) return;
       const active = document.fullscreenElement === shell || isPseudoFullscreen();
+      if (wasFullscreenActive && !active) {
+        setScale(MIN_SCALE);
+      }
       fullscreenButton.textContent = active ? "離開全螢幕" : "全螢幕";
       shell.classList.toggle("cherry-map-shell--fullscreen-active", active);
+      wasFullscreenActive = active;
     }
 
     viewport.addEventListener("pointerdown", onPointerDown);
@@ -350,6 +472,14 @@ const mapImageUrl = withBasePath("/images/cherry/garden-map.jpg");
   .cherry-map-shell--fullscreen-active #cherry-map-viewport {
     flex: 1;
     min-height: 0;
+  }
+
+  .cherry-map-shell--fullscreen-active #cherry-map-image {
+    width: auto;
+    height: 100%;
+    max-width: none;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .cherry-map-shell--pseudo-fullscreen {
