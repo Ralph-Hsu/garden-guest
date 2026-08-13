@@ -5,6 +5,8 @@ description: 墨染櫻是染井吉野的變種，花色偏淡，近乎白色，�
 image: /images/cherry/sumizome/cover.jpg
 gallery:
   - /images/cherry/sumizome/01.jpg
+  - /images/cherry/sumizome/02.jpg
+  - /images/cherry/sumizome/03.jpg
 bloomSeason: 3月
 mapPosition:
   x: 80

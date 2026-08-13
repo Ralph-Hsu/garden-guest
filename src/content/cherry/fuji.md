@@ -6,6 +6,7 @@ image: /images/cherry/fuji/cover.jpg
 gallery:
   - /images/cherry/fuji/01.jpg
   - /images/cherry/fuji/02.jpg
+  - /images/cherry/fuji/03.jpg
 bloomSeason: 2月中旬～3月
 mapPosition:
   x: 35
