@@ -1,0 +1,261 @@
+---
+interface Props {
+  src: string;
+  alt: string;
+  class?: string;
+  imageClass?: string;
+  caption?: string;
+}
+
+const { src, alt, class: className = "", imageClass = "" } = Astro.props;
+---
+
+<div class="image-viewer" data-image-viewer>
+  <button
+    type="button"
+    class={`image-viewer-trigger block w-full cursor-pointer border-0 bg-transparent p-0 ${className}`}
+    aria-label={`放大檢視 ${alt}`}
+  >
+    <img
+      src={src}
+      alt={alt}
+      class={`block h-auto w-full object-cover transition-transform duration-300 hover:scale-[1.02] ${imageClass}`}
+    />
+  </button>
+
+  <div
+    class="image-viewer-overlay"
+    aria-hidden="true"
+  >
+    <button
+      type="button"
+      class="image-viewer-close"
+      aria-label="關閉圖片檢視"
+    >
+      ×
+    </button>
+
+    <div class="image-viewer-stage">
+      <img src={src} alt={alt} class="image-viewer-image" />
+    </div>
+  </div>
+</div>
+
+<style>
+  .image-viewer-overlay {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 99999;
+    overflow: hidden;
+    touch-action: none;
+  }
+
+  .image-viewer-overlay.is-open {
+    display: flex;
+  }
+
+  .image-viewer-stage {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    cursor: grab;
+    touch-action: none;
+  }
+
+  .image-viewer-stage:active {
+    cursor: grabbing;
+  }
+
+  .image-viewer-image {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    user-select: none;
+    pointer-events: none;
+    transform: translate3d(var(--pan-x, 0px), var(--pan-y, 0px), 0) scale(var(--zoom, 1));
+    transform-origin: center center;
+    transition: transform 0.12s ease-out;
+    will-change: transform;
+  }
+
+  .image-viewer-close {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 100000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 9999px;
+    background: rgba(0, 0, 0, 0.45);
+    color: white;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .image-viewer-close:hover {
+    background: rgba(0, 0, 0, 0.7);
+  }
+</style>
+
+<script>
+  function clamp(value: number, min: number, max: number) {
+    return Math.min(Math.max(value, min), max);
+  }
+
+  function getDistance(a: Touch, b: Touch) {
+    return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
+  }
+
+  function initImageViewer() {
+    const viewers = document.querySelectorAll<HTMLElement>("[data-image-viewer]");
+
+    viewers.forEach((viewer) => {
+      if (viewer.dataset.initialized === "true") return;
+      viewer.dataset.initialized = "true";
+
+      const trigger = viewer.querySelector<HTMLButtonElement>(".image-viewer-trigger");
+      const overlay = viewer.querySelector<HTMLElement>(".image-viewer-overlay");
+      const closeButton = viewer.querySelector<HTMLButtonElement>(".image-viewer-close");
+      const stage = viewer.querySelector<HTMLElement>(".image-viewer-stage");
+      const image = viewer.querySelector<HTMLImageElement>(".image-viewer-image");
+
+      if (!trigger || !overlay || !closeButton || !stage || !image) return;
+
+      document.body.appendChild(overlay);
+
+      let zoom = 1;
+      let panX = 0;
+      let panY = 0;
+      let dragStart: { x: number; y: number; panX: number; panY: number } | null = null;
+      let pinchStart: { distance: number; zoom: number } | null = null;
+
+      const applyTransform = () => {
+        image.style.setProperty("--zoom", zoom.toFixed(3));
+        image.style.setProperty("--pan-x", `${panX}px`);
+        image.style.setProperty("--pan-y", `${panY}px`);
+      };
+
+      const resetView = () => {
+        zoom = 1;
+        panX = 0;
+        panY = 0;
+        applyTransform();
+      };
+
+      const openViewer = () => {
+        document.body.appendChild(overlay);
+        overlay.classList.add("is-open");
+        overlay.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        resetView();
+      };
+
+      const closeViewer = () => {
+        overlay.classList.remove("is-open");
+        overlay.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        resetView();
+      };
+
+      trigger.addEventListener("click", openViewer);
+      closeButton.addEventListener("click", closeViewer);
+
+      overlay.addEventListener("click", (event) => {
+        if (event.target === overlay) {
+          closeViewer();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && overlay.classList.contains("is-open")) {
+          closeViewer();
+        }
+      });
+
+      overlay.addEventListener(
+        "wheel",
+        (event) => {
+          event.preventDefault();
+          const factor = event.deltaY < 0 ? 1.12 : 0.88;
+          zoom = clamp(zoom * factor, 1, 5);
+          applyTransform();
+        },
+        { passive: false },
+      );
+
+      stage.addEventListener("pointerdown", (event) => {
+        if (zoom <= 1) return;
+        dragStart = { x: event.clientX, y: event.clientY, panX, panY };
+        stage.setPointerCapture(event.pointerId);
+      });
+
+      stage.addEventListener("pointermove", (event) => {
+        if (!dragStart) return;
+        panX = dragStart.panX + (event.clientX - dragStart.x);
+        panY = dragStart.panY + (event.clientY - dragStart.y);
+        applyTransform();
+      });
+
+      stage.addEventListener("pointerup", () => {
+        dragStart = null;
+      });
+
+      stage.addEventListener("pointerleave", () => {
+        dragStart = null;
+      });
+
+      overlay.addEventListener(
+        "touchstart",
+        (event) => {
+          if (event.touches.length === 2) {
+            const [first, second] = [event.touches[0], event.touches[1]];
+            pinchStart = {
+              distance: getDistance(first, second),
+              zoom,
+            };
+          }
+        },
+        { passive: true },
+      );
+
+      overlay.addEventListener(
+        "touchmove",
+        (event) => {
+          if (event.touches.length === 2 && pinchStart) {
+            event.preventDefault();
+            const [first, second] = [event.touches[0], event.touches[1]];
+            const distance = getDistance(first, second);
+            const ratio = distance / pinchStart.distance;
+            zoom = clamp(pinchStart.zoom * ratio, 1, 5);
+            applyTransform();
+          }
+        },
+        { passive: false },
+      );
+
+      overlay.addEventListener("touchend", () => {
+        pinchStart = null;
+      });
+    });
+  }
+
+  initImageViewer();
+  document.addEventListener("astro:after-swap", initImageViewer);
+</script>
