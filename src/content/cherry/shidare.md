@@ -6,6 +6,8 @@ image: /images/cherry/shidare/cover.jpg
 gallery:
   - /images/cherry/shidare/01.jpg
   - /images/cherry/shidare/02.jpg
+  - /images/cherry/shidare/03.jpg
+  - /images/cherry/shidare/04.jpg
 bloomSeason: 1月下旬～2月
 smapPosition:
   x: 46

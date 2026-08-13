@@ -6,6 +6,7 @@ image: /images/cherry/yae/cover.jpg
 gallery:
   - /images/cherry/yae/01.jpg
   - /images/cherry/yae/02.jpg
+  - /images/cherry/yae/03.jpg
 bloomSeason: 1月下旬～2月
 mapPosition:
   x: 50

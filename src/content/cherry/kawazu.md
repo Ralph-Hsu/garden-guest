@@ -8,6 +8,7 @@ gallery:
   - /images/cherry/kawazu/02.jpg
   - /images/cherry/kawazu/03.jpg
   - /images/cherry/kawazu/04.jpg
+  - /images/cherry/kawazu/05.jpg
 bloomSeason: 1月下旬～2月
 mapPosition:
   x: 60

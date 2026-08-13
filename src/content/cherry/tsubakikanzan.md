@@ -5,6 +5,8 @@ description: 椿寒櫻是山茶花與寒緋櫻的雜交種，在寒冬中率先�
 image: /images/cherry/tsubakikanzan/cover.jpg
 gallery:
   - /images/cherry/tsubakikanzan/01.jpg
+  - /images/cherry/tsubakikanzan/02.jpg
+  - /images/cherry/tsubakikanzan/03.jpg
 bloomSeason: 2月上旬～3上旬月
 mapPosition:
   x: 60

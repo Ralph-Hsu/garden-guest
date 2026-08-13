@@ -6,6 +6,8 @@ image: /images/cherry/formosana/cover.jpg
 gallery:
   - /images/cherry/formosana/01.jpg
   - /images/cherry/formosana/02.jpg
+  - /images/cherry/formosana/03.jpg
+  - /images/cherry/formosana/04.jpg
 bloomSeason: 1月～2月
 mapPosition:
   x: 50
