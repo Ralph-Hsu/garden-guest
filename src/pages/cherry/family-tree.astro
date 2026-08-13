@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@components/base/BaseLayout.astro";
+import ImageViewer from "@components/common/ImageViewer.astro";
 import { withBasePath } from "@lib/url";
 ---
 
@@ -29,13 +30,13 @@ import { withBasePath } from "@lib/url";
              【請將族譜圖片放置於 /public/images/cherry/family-tree.jpg】
              建議尺寸：1200×800px 或以上 -->
         <div class="w-full rounded-xl overflow-hidden bg-stone-100 dark:bg-stone-800">
-          <img
-            src={withBasePath("/images/cherry/family-tree.jpg")}
-            alt="中台庭園櫻花族譜"
-            class="w-full h-auto object-contain"
-            loading="lazy"
-            onerror="this.parentElement.innerHTML='<div class=\'flex flex-col items-center justify-center py-20 text-stone-400\'><span class=\'text-5xl mb-4\'>🌳</span><p class=\'font-secondary text-sm text-center\'>請將族譜圖片放置於<br/><code>/public/images/cherry/family-tree.jpg</code></p></div>'"
-          />
+          <ImageViewer
+          src={withBasePath("/images/cherry/family-tree.jpg")}
+          alt="中台庭園櫻花族譜"
+          class="block h-full w-full"
+          imageClass="h-full min-h-[220px] w-full"
+          caption="櫻花族譜"
+        />
         </div>
       </div>
 
