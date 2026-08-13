@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "@components/base/BaseLayout.astro";
+import ImageViewer from "@components/common/ImageViewer.astro";
 import { getCollection } from "astro:content";
 import { withBasePath } from "@lib/url";
 
@@ -24,6 +25,20 @@ const tropicalEntries = allEntries.filter(e => e.data.type === "tropical");
         <p class="font-secondary text-sm tracking-[0.3em] text-teal-200 uppercase mb-2">Water Lilies</p>
         <h1 class="text-white mb-2">中台庭園・睡蓮</h1>
         <p class="font-secondary text-stone-200 text-sm">寒帶 · 熱帶 · 百種風情</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section container -mt-8">
+    <div class="grid gap-6 md:grid-cols-2">
+      <div class="glass overflow-hidden rounded-3xl border border-white/10 shadow-lg">
+        <ImageViewer
+          src={withBasePath("/images/lotus/lotus-poster.jpg")}
+          alt="中台庭園睡蓮海報"
+          class="block h-full w-full"
+          imageClass="h-full min-h-[220px] w-full"
+          caption="睡蓮海報"
+        />
       </div>
     </div>
   </section>
