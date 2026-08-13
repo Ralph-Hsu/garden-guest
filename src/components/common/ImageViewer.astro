@@ -85,8 +85,12 @@ const { src, alt, class: className = "", imageClass = "" } = Astro.props;
     pointer-events: none;
     transform: translate3d(var(--pan-x, 0px), var(--pan-y, 0px), 0) scale(var(--zoom, 1));
     transform-origin: center center;
-    transition: transform 0.12s ease-out;
+    transition: none;
     will-change: transform;
+  }
+
+  .image-viewer-image.is-bouncing {
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .image-viewer-close {
@@ -119,6 +123,13 @@ const { src, alt, class: className = "", imageClass = "" } = Astro.props;
     return Math.min(Math.max(value, min), max);
   }
 
+  function getMidpoint(a: Touch, b: Touch) {
+    return {
+      x: (a.clientX + b.clientX) / 2,
+      y: (a.clientY + b.clientY) / 2,
+    };
+  }
+
   function getDistance(a: Touch, b: Touch) {
     return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY);
   }
@@ -144,7 +155,34 @@ const { src, alt, class: className = "", imageClass = "" } = Astro.props;
       let panX = 0;
       let panY = 0;
       let dragStart: { x: number; y: number; panX: number; panY: number } | null = null;
-      let pinchStart: { distance: number; zoom: number } | null = null;
+      let pinchStart: {
+        distance: number;
+        zoom: number;
+        panX: number;
+        panY: number;
+        midpoint: { x: number; y: number };
+      } | null = null;
+      let activeTouchCount = 0;
+      let bounceTimeout: number | undefined;
+
+      const getPanBounds = () => {
+        const width = image.clientWidth * zoom;
+        const height = image.clientHeight * zoom;
+
+        return {
+          x: Math.max(0, (width - stage.clientWidth) / 2),
+          y: Math.max(0, (height - stage.clientHeight) / 2),
+        };
+      };
+
+      const getOvershoot = () => Math.min(stage.clientWidth, stage.clientHeight) * 0.1;
+
+      const applyResistance = (value: number, bound: number) => {
+        if (bound === 0) return 0;
+        if (value > bound) return bound + Math.min((value - bound) * 0.22, getOvershoot());
+        if (value < -bound) return -bound - Math.min((-value - bound) * 0.22, getOvershoot());
+        return value;
+      };
 
       const applyTransform = () => {
         image.style.setProperty("--zoom", zoom.toFixed(3));
@@ -152,7 +190,34 @@ const { src, alt, class: className = "", imageClass = "" } = Astro.props;
         image.style.setProperty("--pan-y", `${panY}px`);
       };
 
+      const cancelBounce = () => {
+        if (bounceTimeout !== undefined) {
+          window.clearTimeout(bounceTimeout);
+          bounceTimeout = undefined;
+        }
+        image.classList.remove("is-bouncing");
+      };
+
+      const settlePan = () => {
+        const bounds = getPanBounds();
+        const nextPanX = clamp(panX, -bounds.x, bounds.x);
+        const nextPanY = clamp(panY, -bounds.y, bounds.y);
+
+        if (nextPanX === panX && nextPanY === panY) return;
+
+        cancelBounce();
+        image.classList.add("is-bouncing");
+        panX = nextPanX;
+        panY = nextPanY;
+        applyTransform();
+        bounceTimeout = window.setTimeout(() => {
+          image.classList.remove("is-bouncing");
+          bounceTimeout = undefined;
+        }, 320);
+      };
+
       const resetView = () => {
+        cancelBounce();
         zoom = 1;
         panX = 0;
         panY = 0;
@@ -194,41 +259,60 @@ const { src, alt, class: className = "", imageClass = "" } = Astro.props;
         (event) => {
           event.preventDefault();
           const factor = event.deltaY < 0 ? 1.12 : 0.88;
+          cancelBounce();
           zoom = clamp(zoom * factor, 1, 5);
+          if (zoom === 1) {
+            panX = 0;
+            panY = 0;
+          } else {
+            settlePan();
+          }
           applyTransform();
         },
         { passive: false },
       );
 
       stage.addEventListener("pointerdown", (event) => {
-        if (zoom <= 1) return;
+        if (zoom <= 1 || (event.pointerType === "touch" && activeTouchCount > 1)) return;
+        cancelBounce();
         dragStart = { x: event.clientX, y: event.clientY, panX, panY };
         stage.setPointerCapture(event.pointerId);
       });
 
       stage.addEventListener("pointermove", (event) => {
-        if (!dragStart) return;
-        panX = dragStart.panX + (event.clientX - dragStart.x);
-        panY = dragStart.panY + (event.clientY - dragStart.y);
+        if (!dragStart || (event.pointerType === "touch" && activeTouchCount > 1)) return;
+        const bounds = getPanBounds();
+        const nextPanX = dragStart.panX + (event.clientX - dragStart.x);
+        const nextPanY = dragStart.panY + (event.clientY - dragStart.y);
+        panX = applyResistance(nextPanX, bounds.x);
+        panY = applyResistance(nextPanY, bounds.y);
         applyTransform();
       });
 
-      stage.addEventListener("pointerup", () => {
+      const endDrag = () => {
+        if (!dragStart) return;
         dragStart = null;
-      });
+        settlePan();
+      };
 
-      stage.addEventListener("pointerleave", () => {
-        dragStart = null;
-      });
+      stage.addEventListener("pointerup", endDrag);
+      stage.addEventListener("pointercancel", endDrag);
+      stage.addEventListener("lostpointercapture", endDrag);
+      window.addEventListener("blur", endDrag);
 
       overlay.addEventListener(
         "touchstart",
         (event) => {
+          activeTouchCount = event.touches.length;
           if (event.touches.length === 2) {
             const [first, second] = [event.touches[0], event.touches[1]];
+            dragStart = null;
             pinchStart = {
               distance: getDistance(first, second),
               zoom,
+              panX,
+              panY,
+              midpoint: getMidpoint(first, second),
             };
           }
         },
@@ -243,15 +327,38 @@ const { src, alt, class: className = "", imageClass = "" } = Astro.props;
             const [first, second] = [event.touches[0], event.touches[1]];
             const distance = getDistance(first, second);
             const ratio = distance / pinchStart.distance;
-            zoom = clamp(pinchStart.zoom * ratio, 1, 5);
+            const midpoint = getMidpoint(first, second);
+            const nextZoom = clamp(pinchStart.zoom * ratio, 1, 5);
+            const zoomRatio = nextZoom / pinchStart.zoom;
+
+            cancelBounce();
+            panX = pinchStart.panX * zoomRatio + (midpoint.x - pinchStart.midpoint.x);
+            panY = pinchStart.panY * zoomRatio + (midpoint.y - pinchStart.midpoint.y);
+            zoom = nextZoom;
+            if (zoom === 1) {
+              panX = 0;
+              panY = 0;
+            }
+            const bounds = getPanBounds();
+            panX = applyResistance(panX, bounds.x);
+            panY = applyResistance(panY, bounds.y);
             applyTransform();
           }
         },
         { passive: false },
       );
 
-      overlay.addEventListener("touchend", () => {
+      overlay.addEventListener("touchend", (event) => {
+        activeTouchCount = event.touches.length;
         pinchStart = null;
+        if (activeTouchCount === 0) settlePan();
+      });
+
+      overlay.addEventListener("touchcancel", () => {
+        activeTouchCount = 0;
+        pinchStart = null;
+        dragStart = null;
+        settlePan();
       });
     });
   }
